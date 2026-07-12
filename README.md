@@ -77,9 +77,9 @@ for the tradeoffs between the two approaches.
 > Your repo's URL will be something like this:
 > `https://github.com/<your_github_username>/kickstart.nvim.git`
 
-You likely want to remove `nvim-pack-lock.json` from your repo's `.gitignore`
-file too - it's ignored in the kickstart repo to make maintenance easier, but
-it's recommended to track it in version control (see `:help vim.pack-lockfile`).
+You likely want to remove `lazy-lock.json` from your fork's `.gitignore` file
+too - it's ignored in the kickstart repo to make maintenance easier, but it's
+[recommended to track it in version control](https://lazy.folke.io/usage/lockfile).
 
 #### Clone kickstart.nvim
 
@@ -120,10 +120,8 @@ Start Neovim
 nvim
 ```
 
-That's it! `vim.pack` will install all the plugins from your config. Use
-`:lua vim.pack.update(nil, { offline = true })` to inspect plugin state and
-`:lua vim.pack.update()` to fetch updates (`:write` applies updates, `:quit`
-cancels them).
+That's it! Lazy will install all the plugins you have. Use `:Lazy` to view
+the current plugin status. Hit `q` to close the window.
 
 #### Read The Friendly Documentation
 
@@ -157,8 +155,7 @@ examples of adding popularly requested plugins.
     `~/.local/share/nvim-kickstart`. You can apply this approach to any Neovim
     distribution that you would like to try out.
 * What if I want to "uninstall" this configuration:
-  * Remove your config directory and local data directory (for example,
-    `~/.config/nvim` and `~/.local/share/nvim`).
+  * See [lazy.nvim uninstall](https://lazy.folke.io/usage#-uninstalling) information
 * Why is the kickstart `init.lua` a single file? Wouldn't it make sense to split it into multiple files?
   * The main purpose of kickstart is to serve as a teaching tool and a reference
     configuration that someone can easily use to `git clone` as a basis for their own.
@@ -179,36 +176,17 @@ After installing all the dependencies continue with the [Install Kickstart](#ins
 #### Windows Installation
 
 <details><summary>Windows with Microsoft C++ Build Tools and CMake</summary>
-Kickstart's default config is make-only for `telescope-fzf-native.nvim`.
-If `make` is unavailable, the plugin is skipped.
+Installation may require installing build tools and updating the run command for `telescope-fzf-native`
 
-Recommended: install `make` (see the chocolatey section below).
+See `telescope-fzf-native` documentation for [more details](https://github.com/nvim-telescope/telescope-fzf-native.nvim#installation)
 
-If you want a CMake-only setup, customize `init.lua` in two places:
+This requires:
 
-1. Include `telescope-fzf-native.nvim` when `cmake` is available:
-
-```lua
-if vim.fn.executable 'make' == 1 or vim.fn.executable 'cmake' == 1 then
-  table.insert(plugins, gh 'nvim-telescope/telescope-fzf-native.nvim')
-end
-```
-
-2. In the `PackChanged` hook, use CMake when `make` is unavailable:
+- Install CMake and the Microsoft C++ Build Tools on Windows
 
 ```lua
-if name == 'telescope-fzf-native.nvim' then
-  if vim.fn.executable 'make' == 1 then
-    run_build(name, { 'make' }, ev.data.path)
-  elseif vim.fn.executable 'cmake' == 1 then
-    run_build(name, { 'cmake', '-S.', '-Bbuild', '-DCMAKE_BUILD_TYPE=Release' }, ev.data.path)
-    run_build(name, { 'cmake', '--build', 'build', '--config', 'Release', '--target', 'install' }, ev.data.path)
-  end
-  return
-end
+{'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
 ```
-
-See `telescope-fzf-native` documentation for [build details](https://github.com/nvim-telescope/telescope-fzf-native.nvim#installation).
 </details>
 <details><summary>Windows with gcc/make using chocolatey</summary>
 Alternatively, one can install gcc and make which don't require changing the config,

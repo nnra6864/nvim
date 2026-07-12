@@ -1,0 +1,20 @@
+return {
+  transparent = true,
+
+  base00 = '#041C26',
+  base01 = '#082E3F',
+  base02 = '#082E3F',
+  base03 = '#849FA5',
+  base04 = '#849FA5',
+  base05 = '#A3C5CC',
+  base06 = '#B7DCE5',
+  base07 = '#B7DCE5',
+  base08 = '#993D49',
+  base09 = '#2D8699',
+  base0A = '#7A993D',
+  base0B = '#2D998F',
+  base0C = '#2D998F',
+  base0D = '#2D8699',
+  base0E = '#4D74AF',
+  base0F = '#B7DCE5',
+}
