@@ -27,6 +27,9 @@ local function overrides(theme)
   for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection', 'BlinkCmpScrollBarThumb', 'SnacksPickerListCursorLine' } do
     vim.api.nvim_set_hl(0, group, { bg = M.get 'blue', bold = true })
   end
+  -- The pinned context is transparent like the code, so a line marks where it ends
+  vim.api.nvim_set_hl(0, 'TreesitterContextBottom', { underline = true, sp = M.get 'br_black' })
+  vim.api.nvim_set_hl(0, 'TreesitterContextLineNumberBottom', { underline = true, sp = M.get 'br_black' })
 end
 
 local transparent_groups = {

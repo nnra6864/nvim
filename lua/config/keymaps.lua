@@ -15,6 +15,8 @@ map('n', '<leader>Z', function() Snacks.zen.zoom() end, { desc = 'Zoom window' }
 map({ 'n', 't' }, ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
 map({ 'n', 't' }, '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
 
+map('n', 'gC', function() require('treesitter-context').go_to_context(vim.v.count1) end, { desc = 'Go to pinned context' })
+
 -- Formatting (when it runs on save is decided in plugins/conform.lua)
 map({ 'n', 'x' }, '<leader>f', function() require('conform').format { async = true } end, { desc = 'Format' })
 
@@ -30,6 +32,10 @@ Snacks.toggle.option('wrap', { name = 'Wrap' }):map '<leader>tw'
 Snacks.toggle.option('spell', { name = 'Spelling' }):map '<leader>ts'
 Snacks.toggle.indent():map '<leader>ti'
 Snacks.toggle.scroll():map '<leader>tS'
+toggle('<leader>tc', 'Pinned context', function() return require('treesitter-context').enabled() end,
+  function(on) require('treesitter-context')[on and 'enable' or 'disable']() end)
+toggle('<leader>tm', 'Markdown rendering', function() return require('render-markdown').get() end,
+  function(on) require('render-markdown').set(on) end)
 
 -- Windows (move them with the built-in <C-w>H/J/K/L; Alt+hjkl moves lines)
 map('n', '<leader>|', '<C-w>v', { desc = 'Split vertically' })
@@ -66,6 +72,54 @@ map('n', '<leader>st', pick 'colorschemes', { desc = 'Themes' })
 map('n', '<leader>sr', pick 'resume', { desc = 'Resume last search' })
 map('n', '<leader>sn', pick('files', { cwd = vim.fn.stdpath 'config' }), { desc = 'Neovim config' })
 map('n', '<leader>ss', pick 'pickers', { desc = 'All pickers' })
+-- Replace (grug-far): in the selection's text, or empty in normal mode; <leader>sF limits it to this file
+map('n', '<leader>sR', function() require('grug-far').open() end, { desc = 'Search and replace' })
+map('x', '<leader>sR', function() require('grug-far').with_visual_selection() end, { desc = 'Search and replace selection' })
+map('n', '<leader>sF', function() require('grug-far').open { prefills = { paths = vim.fn.expand '%' } } end, { desc = 'Search and replace in file' })
+
+-- Notes (obsidian.nvim, works from anywhere)
+local obsidian = function(cmd) return '<cmd>Obsidian ' .. cmd .. '<CR>' end
+map('n', '<leader>oo', obsidian 'quick_switch', { desc = 'Find note' })
+map('n', '<leader>os', obsidian 'search', { desc = 'Search notes' })
+map('n', '<leader>on', obsidian 'new', { desc = 'New note' })
+map('n', '<leader>oN', obsidian 'new_from_template', { desc = 'New note from template' })
+map('n', '<leader>ot', obsidian 'today', { desc = 'Today' })
+map('n', '<leader>od', obsidian 'dailies', { desc = 'Daily notes' })
+map('n', '<leader>ob', obsidian 'backlinks', { desc = 'Backlinks' })
+map('n', '<leader>ol', obsidian 'links', { desc = 'Links in note' })
+map('n', '<leader>og', obsidian 'tags', { desc = 'Tags' })
+map('n', '<leader>op', obsidian 'paste_img', { desc = 'Paste image' })
+map('n', '<leader>oT', obsidian 'template', { desc = 'Insert template' })
+
+-- Debugging. F-keys while stepping; the view opens with the session
+local dap = function(fn, ...)
+  local args = { ... }
+  return function() require('dap')[fn](unpack(args)) end
+end
+map('n', '<F5>', dap 'continue', { desc = 'Debug: start/continue' })
+map('n', '<F10>', dap 'step_over', { desc = 'Debug: step over' })
+map('n', '<F11>', dap 'step_into', { desc = 'Debug: step into' })
+map('n', '<F12>', dap 'step_out', { desc = 'Debug: step out' })
+map('n', '<leader>dc', dap 'continue', { desc = 'Start/continue' })
+map('n', '<leader>db', dap 'toggle_breakpoint', { desc = 'Toggle breakpoint' })
+map('n', '<leader>dB', function()
+  vim.ui.input({ prompt = 'Condition: ' }, function(cond)
+    if cond then require('dap').set_breakpoint(cond) end
+  end)
+end, { desc = 'Conditional breakpoint' })
+map('n', '<leader>dC', dap 'run_to_cursor', { desc = 'Run to cursor' })
+map('n', '<leader>dl', dap 'run_last', { desc = 'Rerun last' })
+map('n', '<leader>dt', dap 'terminate', { desc = 'Stop' })
+-- dap-view is set up when nvim-dap loads, so require that first
+local view = function(fn)
+  return function()
+    require 'dap'
+    require('dap-view')[fn]()
+  end
+end
+map({ 'n', 'x' }, '<leader>dw', view 'add_expr', { desc = 'Watch expression' })
+map('n', '<leader>dv', view 'toggle', { desc = 'Toggle debug view' })
+map({ 'n', 'x' }, '<leader>dh', view 'hover', { desc = 'Value under cursor' })
 
 -- Indent
 local indent = function(...)

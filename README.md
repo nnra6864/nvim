@@ -17,6 +17,9 @@ sudo pacman -S --needed stylua shfmt jq
 sudo pacman -S --needed websocat
 # Images in the editor (any format but PNG, PDFs, Typst math)
 sudo pacman -S --needed imagemagick ghostscript typst
+# Debuggers: C/C++/Zig, Python, C# (Dart/Flutter use the Flutter SDK)
+sudo pacman -S --needed gdb python-debugpy
+paru -S netcoredbg
 ```
 
 - Zig: install `zls` matching your zig version (e.g. via zvm).
