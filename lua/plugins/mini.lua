@@ -12,7 +12,11 @@ return {
     -- UI
     require('config.statusline').setup()
 
-    require('mini.indentscope').setup { symbol = '│' }
+    local indentscope = require 'mini.indentscope'
+    indentscope.setup {
+      symbol = '│',
+      draw = { delay = 50, animation = indentscope.gen_animation.linear { duration = 60, unit = 'total' } },
+    }
 
     local hipatterns = require 'mini.hipatterns'
     local word = function(w, group) return { pattern = '%f[%w]()' .. w .. '()%f[%W]', group = group } end
@@ -23,6 +27,11 @@ return {
         todo = word('TODO', 'MiniHipatternsTodo'),
         note = word('NOTE', 'MiniHipatternsNote'),
         hex_color = hipatterns.gen_highlighter.hex_color(),
+        -- #RRGGBBAA: the color is shown without its alpha
+        hex_alpha = {
+          pattern = '#%x%x%x%x%x%x%x%x%f[%X]',
+          group = function(_, match) return hipatterns.compute_hex_color_group(match:sub(1, 7), 'bg') end,
+        },
       },
     }
 
