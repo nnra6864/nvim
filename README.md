@@ -15,6 +15,8 @@ paru -S fish-lsp                                                   # fish (AUR)
 sudo pacman -S --needed stylua shfmt jq
 # Typst preview (with tinymist above)
 sudo pacman -S --needed websocat
+# Images in the editor (any format but PNG, PDFs, Typst math)
+sudo pacman -S --needed imagemagick ghostscript typst
 ```
 
 - Zig: install `zls` matching your zig version (e.g. via zvm).

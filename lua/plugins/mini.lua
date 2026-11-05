@@ -6,17 +6,8 @@ return {
     require('mini.icons').setup { style = vim.g.have_nerd_font and 'glyph' or 'ascii' }
     MiniIcons.mock_nvim_web_devicons()
 
-    require('mini.notify').setup()
-    vim.notify = MiniNotify.make_notify()
-
     -- UI
     require('config.statusline').setup()
-
-    local indentscope = require 'mini.indentscope'
-    indentscope.setup {
-      symbol = '│',
-      draw = { delay = 50, animation = indentscope.gen_animation.linear { duration = 100, unit = 'total' } },
-    }
 
     local hipatterns = require 'mini.hipatterns'
     local word = function(w, group) return { pattern = '%f[%w]()' .. w .. '()%f[%W]', group = group } end

@@ -9,25 +9,27 @@ map('n', '<Esc>', '<cmd>nohlsearch<CR>')
 map({ 'n', 'v' }, '<C-S-c>', '"+y', { desc = 'Copy to clipboard' })
 map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 map('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Diagnostics to loclist' })
-map('n', '<leader>n', function() MiniNotify.show_history() end, { desc = 'Notification history' })
-
--- Completion (the in-menu keys live in plugins/blink.lua)
-map('n', '<leader>tg', function()
-  vim.g.ghost_text = vim.g.ghost_text == false
-  vim.notify('Ghost text ' .. (vim.g.ghost_text and 'on' or 'off'))
-end, { desc = 'Toggle ghost text' })
-map('n', '<leader>td', function()
-  local docs = require('blink.cmp.config').completion.documentation
-  docs.auto_show = not docs.auto_show
-  vim.notify('Completion docs auto-show ' .. (docs.auto_show and 'on' or 'off'))
-end, { desc = 'Toggle completion docs auto-show' })
+map('n', '<leader>n', function() Snacks.picker.notifications() end, { desc = 'Notification history' })
+map('n', '<leader>z', function() Snacks.zen() end, { desc = 'Zen mode' })
+map('n', '<leader>Z', function() Snacks.zen.zoom() end, { desc = 'Zoom window' })
+map({ 'n', 't' }, ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
+map({ 'n', 't' }, '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
 
 -- Formatting (when it runs on save is decided in plugins/conform.lua)
 map({ 'n', 'x' }, '<leader>f', function() require('conform').format { async = true } end, { desc = 'Format' })
-map('n', '<leader>tf', function()
-  vim.g.format_on_save = vim.g.format_on_save == false
-  vim.notify('Format on save ' .. (vim.g.format_on_save and 'on' or 'off'))
-end, { desc = 'Toggle format on save' })
+
+-- Toggles. which-key shows each one's current state
+local function toggle(key, name, get, set) Snacks.toggle.new({ id = name, name = name, get = get, set = set }):map(key) end
+toggle('<leader>tg', 'Ghost text', function() return vim.g.ghost_text ~= false end, function(on) vim.g.ghost_text = on end)
+toggle('<leader>td', 'Completion docs', function() return require('blink.cmp.config').completion.documentation.auto_show end,
+  function(on) require('blink.cmp.config').completion.documentation.auto_show = on end)
+toggle('<leader>tf', 'Format on save', function() return vim.g.format_on_save ~= false end, function(on) vim.g.format_on_save = on end)
+Snacks.toggle.inlay_hints():map '<leader>th'
+Snacks.toggle.diagnostics():map '<leader>tx'
+Snacks.toggle.option('wrap', { name = 'Wrap' }):map '<leader>tw'
+Snacks.toggle.option('spell', { name = 'Spelling' }):map '<leader>ts'
+Snacks.toggle.indent():map '<leader>ti'
+Snacks.toggle.scroll():map '<leader>tS'
 
 -- Windows (move them with the built-in <C-w>H/J/K/L; Alt+hjkl moves lines)
 map('n', '<leader>|', '<C-w>v', { desc = 'Split vertically' })
@@ -90,9 +92,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     bmap('grt', pick 'lsp_type_definitions', 'Type definition')
     bmap('gO', pick 'lsp_symbols', 'Symbols in file')
     bmap('gW', pick 'lsp_workspace_symbols', 'Symbols in workspace')
-    bmap('<leader>th', function()
-      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = args.buf }, { bufnr = args.buf })
-    end, 'Toggle inlay hints')
   end,
 })
 
@@ -145,5 +144,9 @@ map('n', '<leader>gc', function()
     end,
   }
 end, { desc = 'Diff commits' })
+map({ 'n', 'x' }, '<leader>gB', function() Snacks.gitbrowse() end, { desc = 'Open in browser' })
+map({ 'n', 'x' }, '<leader>gY', function()
+  Snacks.gitbrowse { open = function(url) vim.fn.setreg('+', url) end, notify = false }
+end, { desc = 'Copy browser URL' })
 map('n', '<leader>go', function() MiniDiff.toggle_overlay() end, { desc = 'Toggle inline diff' })
 map({ 'n', 'x' }, '<leader>gb', function() MiniGit.show_at_cursor() end, { desc = 'Blame/commit at cursor' })

@@ -34,23 +34,15 @@ vim.diagnostic.config {
   },
 }
 
--- Highlight other uses of the symbol under the cursor after a short pause
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('lsp-highlight', { clear = true }),
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if not (client and client:supports_method('textDocument/documentHighlight', args.buf)) then return end
-
-    local group = vim.api.nvim_create_augroup('lsp-highlight-' .. args.buf, { clear = true })
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, { group = group, buffer = args.buf, callback = vim.lsp.buf.document_highlight })
-    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, { group = group, buffer = args.buf, callback = vim.lsp.buf.clear_references })
-    vim.api.nvim_create_autocmd('LspDetach', {
-      group = group,
-      buffer = args.buf,
-      callback = function()
-        vim.lsp.buf.clear_references()
-        vim.api.nvim_clear_autocmds { group = group, buffer = args.buf }
-      end,
+-- Server progress ("Loading workspace", indexing, ...) as a single notification that updates in place
+vim.api.nvim_create_autocmd('LspProgress', {
+  group = vim.api.nvim_create_augroup('lsp-progress', { clear = true }),
+  callback = function(ev)
+    local done = ev.data.params.value.kind == 'end'
+    vim.notify(vim.lsp.status(), vim.log.levels.INFO, {
+      id = 'lsp_progress',
+      title = 'LSP',
+      icon = done and ' ' or '󰔟 ',
     })
   end,
 })
