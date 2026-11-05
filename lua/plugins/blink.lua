@@ -9,9 +9,9 @@ return {
   opts = {
     keymap = {
       preset = 'none',
-      -- Vim's own completion keys: open the menu, then move through it
-      ['<C-n>'] = { 'show', 'select_next', 'fallback' },
-      ['<C-p>'] = { 'show', 'select_prev', 'fallback' },
+      -- Open the menu, then move through it (same keys as in pickers)
+      ['<C-j>'] = { 'show', 'select_next', 'fallback' },
+      ['<C-k>'] = { 'show', 'select_prev', 'fallback' },
       ['<C-CR>'] = { 'show', 'show_documentation', 'hide_documentation' },
       ['<C-e>'] = { 'hide', 'fallback' },
       ['<CR>'] = { 'accept', 'fallback' },
@@ -20,8 +20,6 @@ return {
 
       ['<Tab>'] = { 'select_next', 'snippet_forward', 'fallback' },
       ['<S-Tab>'] = { 'select_prev', 'snippet_backward', 'fallback' },
-      ['<C-j>'] = { 'select_next', 'fallback' },
-      ['<C-k>'] = { 'select_prev', 'fallback' },
       ['<Down>'] = { 'select_next', 'fallback' },
       ['<Up>'] = { 'select_prev', 'fallback' },
 
