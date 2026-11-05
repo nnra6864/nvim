@@ -15,7 +15,7 @@ return {
     local indentscope = require 'mini.indentscope'
     indentscope.setup {
       symbol = '│',
-      draw = { delay = 50, animation = indentscope.gen_animation.linear { duration = 60, unit = 'total' } },
+      draw = { delay = 50, animation = indentscope.gen_animation.linear { duration = 10, unit = 'step' } },
     }
 
     local hipatterns = require 'mini.hipatterns'
