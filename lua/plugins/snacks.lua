@@ -59,7 +59,7 @@ return {
     indent = {
       enabled = true,
       -- Constant speed: `step` ms per line, capped at `total` ms for big scopes
-      animate = { duration = { step = 10, total = 200 } },
+      animate = { duration = { step = 50, total = 1000 } },
     },
     -- ii/ai select the current indent scope, [i ]i jump to its edges
     scope = { enabled = true },
