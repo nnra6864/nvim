@@ -24,11 +24,6 @@ end
 
 -- Applied after every theme load, on top of base16
 local function overrides(theme)
-  if type(theme) == 'table' and theme.transparent then
-    for name in pairs(vim.api.nvim_get_hl(0, {})) do
-      if name:find '^BlinkCmp' then vim.cmd.highlight(name .. ' guibg=NONE ctermbg=NONE') end
-    end
-  end
   for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection', 'BlinkCmpScrollBarThumb', 'SnacksPickerListCursorLine' } do
     vim.api.nvim_set_hl(0, group, { bg = M.get 'blue', bold = true })
   end
@@ -38,8 +33,20 @@ local transparent_groups = {
   'Normal', 'NormalNC', 'NormalFloat', 'FloatBorder', 'FloatTitle', 'SignColumn', 'LineNr',
   'CursorLine', 'CursorLineNr', 'CursorLineSign', 'EndOfBuffer', 'NonText', 'StatusLine',
   'StatusLineNC', 'WinSeparator', 'Pmenu', 'PmenuSel', 'PmenuSbar', 'PmenuThumb', 'TabLine',
-  'TabLineFill', 'TabLineSel', 'TelescopeNormal', 'TelescopeBorder', 'Folded', 'FoldColumn',
+  'TabLineFill', 'TabLineSel', 'Folded', 'FoldColumn',
+  -- base16 gives the completion windows solid backgrounds
+  'BlinkCmpMenu', 'BlinkCmpMenuBorder', 'BlinkCmpDoc', 'BlinkCmpDocBorder', 'BlinkCmpSignatureHelp',
+  'BlinkCmpSignatureHelpBorder', 'BlinkCmpScrollBarGutter',
 }
+
+-- Plugins' fallback groups (set with `default`). Some plugins only define them once at load,
+-- so they're saved before any theme clears highlights (ours or another one) and put back after.
+local plugin_defaults = {}
+local function save_plugin_defaults()
+  for name, hl in pairs(vim.api.nvim_get_hl(0, {})) do
+    if hl.default then plugin_defaults[name] = hl end
+  end
+end
 
 --- Applies theme.lua. Skipped when it hasn't changed since the last apply, unless forced
 --- (colors/ricer.lua forces it, so `:colorscheme ricer` brings the theme back).
@@ -60,7 +67,11 @@ function M.apply(force)
   if not ok or (type(theme) ~= 'table' and type(theme) ~= 'string') then return end
   applied = src
 
+  -- Start from Neovim's defaults so nothing a previously used theme set is left behind
+  save_plugin_defaults()
+  vim.cmd.highlight 'clear'
   require('base16-colorscheme').setup(theme)
+  for name, hl in pairs(plugin_defaults) do vim.api.nvim_set_hl(0, name, hl) end
   if type(theme) == 'table' and theme.transparent then
     for _, g in ipairs(transparent_groups) do
       vim.cmd.highlight(g .. ' guibg=NONE ctermbg=NONE')
@@ -75,6 +86,10 @@ end
 
 function M.setup()
   M.apply()
+  vim.api.nvim_create_autocmd('ColorSchemePre', {
+    group = vim.api.nvim_create_augroup('colors', { clear = true }),
+    callback = save_plugin_defaults,
+  })
 
   local watcher, timer = vim.uv.new_fs_event(), vim.uv.new_timer()
   if not (watcher and timer) then return end
