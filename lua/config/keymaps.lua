@@ -77,14 +77,18 @@ map('n', '<leader>sR', function() require('grug-far').open() end, { desc = 'Sear
 map('x', '<leader>sR', function() require('grug-far').with_visual_selection() end, { desc = 'Search and replace selection' })
 map('n', '<leader>sF', function() require('grug-far').open { prefills = { paths = vim.fn.expand '%' } } end, { desc = 'Search and replace in file' })
 
--- Notes (obsidian.nvim, works from anywhere)
-local obsidian = function(cmd) return '<cmd>Obsidian ' .. cmd .. '<CR>' end
+-- Notes (obsidian.nvim). Work from anywhere: they use the current vault, or the last one used
+local obsidian = function(cmd)
+  return function()
+    if not require('config.notes').current() then return vim.notify('No Obsidian vault found', vim.log.levels.WARN) end
+    vim.cmd('Obsidian ' .. cmd)
+  end
+end
 map('n', '<leader>oo', obsidian 'quick_switch', { desc = 'Find note' })
 map('n', '<leader>os', obsidian 'search', { desc = 'Search notes' })
-map('n', '<leader>on', obsidian 'new', { desc = 'New note' })
+map('n', '<leader>on', function() require('config.notes').new() end, { desc = 'New note' })
+map('n', '<leader>ot', function() require('config.notes').new(true) end, { desc = 'New TODO (moves open tasks over)' })
 map('n', '<leader>oN', obsidian 'new_from_template', { desc = 'New note from template' })
-map('n', '<leader>ot', obsidian 'today', { desc = 'Today' })
-map('n', '<leader>od', obsidian 'dailies', { desc = 'Daily notes' })
 map('n', '<leader>ob', obsidian 'backlinks', { desc = 'Backlinks' })
 map('n', '<leader>ol', obsidian 'links', { desc = 'Links in note' })
 map('n', '<leader>og', obsidian 'tags', { desc = 'Tags' })

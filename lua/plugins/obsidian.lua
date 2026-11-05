@@ -1,24 +1,28 @@
-local vaults = require 'config.vaults'
-
--- Loads when a note inside a vault is opened, or on :Obsidian (<leader>o maps) from anywhere
-local events = {}
-for _, vault in ipairs(vaults) do
-  vim.list_extend(events, { 'BufReadPre ' .. vault.path .. '/*.md', 'BufNewFile ' .. vault.path .. '/*.md' })
-end
-
 -- In notes: <CR> follows a link or cycles a checkbox, ]o [o jump between links, and the
 -- usual LSP keys work on notes: gd follow link, grr backlinks, grn rename note (updates
 -- every link to it), gra note actions (extract, move, merge, insert template, ...)
 return {
   'obsidian-nvim/obsidian.nvim',
   version = '*',
-  event = events,
   cmd = 'Obsidian',
+  -- Loads for Markdown files inside a vault (any folder with .obsidian), never outside one
+  init = function()
+    vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
+      group = vim.api.nvim_create_augroup('obsidian-vault', { clear = true }),
+      pattern = '*.md',
+      callback = function(ev)
+        local vault = require('config.notes').root(ev.match)
+        if not vault then return end
+        require('config.notes').remember(vault)
+        require('lazy').load { plugins = { 'obsidian.nvim' } }
+      end,
+    })
+  end,
   ---@module 'obsidian'
   ---@type obsidian.config
   opts = {
     legacy_commands = false,
-    workspaces = vaults,
+    workspaces = { { name = 'vault', path = function() return require('config.notes').current() end } },
     picker = { name = 'snacks.picker' },
     -- Rendering is left to render-markdown, which also covers Markdown outside vaults
     ui = { enable = false },
