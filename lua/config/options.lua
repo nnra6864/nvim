@@ -15,6 +15,13 @@ vim.o.softtabstop = -1
 vim.o.expandtab = true
 vim.o.breakindent = true
 
+-- Treesitter folds, everything open by default. Files without a parser just don't fold.
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.o.foldtext = ''
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.inccommand = 'split'
