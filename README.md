@@ -25,3 +25,27 @@ Completion opens with `Ctrl+Enter`, which most terminals don't pass through by d
 # Conflicts with many common binds, such as ones in lazygit
 keybind = ctrl+enter=unbind
 ```
+
+# ☦
+
+```
+   Ὤ
+ Ὁ   Ν
+Ι̅Ϲ̅ │ Χ̅Ϲ̅
+───┼───
+ΝΙ │ ΚΑ
+   ☦
+```
+
+Εἰς δόξαν τοῦ Θεοῦ<br>
+*To the glory of God*
+
+Τῇ Ὑπεραγίᾳ Θεοτόκῳ δόξα<br>
+*Glory to the Most Holy Theotokos*
+
+Δόξα τῷ Θεῷ πάντων ἕνεκεν<br>
+*Glory to God for all things*
+
+ΑΜΗΝ
+
+☦
