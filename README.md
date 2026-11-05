@@ -17,8 +17,8 @@ Personal Neovim config. One file per plugin in [`lua/plugins`](lua/plugins), eve
 - Everything:
 ```sh
 sudo pacman -S --needed neovim git base-devel tree-sitter-cli ripgrep fd yazi lazygit clang lua-language-server marksman ruff ty tinymist bash-language-server shellcheck yaml-language-server stylua shfmt jq websocat imagemagick ghostscript typst gdb python-debugpy
-paru -S --needed fish-lsp netcoredbg
 dotnet tool install --global roslyn-language-server --prerelease
+mkdir -p ~/.local/share/netcoredbg ~/.local/bin && curl -L https://github.com/Samsung/netcoredbg/releases/latest/download/netcoredbg-linux-amd64.tar.gz | tar xz -C ~/.local/share/netcoredbg --strip-components=1 && ln -sf ~/.local/share/netcoredbg/netcoredbg ~/.local/bin/netcoredbg
 ```
 
 Or only what you need:
@@ -34,10 +34,6 @@ sudo pacman -S --needed clang lua-language-server marksman ruff ty tinymist bash
 - C# language server:
 ```sh
 dotnet tool install --global roslyn-language-server --prerelease
-```
-- fish language server:
-```sh
-paru -S --needed fish-lsp
 ```
 - Formatters (clang, ruff, fish and zig bring their own):
 ```sh
@@ -55,14 +51,15 @@ sudo pacman -S --needed imagemagick ghostscript typst
 ```sh
 sudo pacman -S --needed gdb python-debugpy
 ```
-- C# debugger:
+- C# debugger, Samsung's official release:
 ```sh
-paru -S --needed netcoredbg
+mkdir -p ~/.local/share/netcoredbg ~/.local/bin && curl -L https://github.com/Samsung/netcoredbg/releases/latest/download/netcoredbg-linux-amd64.tar.gz | tar xz -C ~/.local/share/netcoredbg --strip-components=1 && ln -sf ~/.local/share/netcoredbg/netcoredbg ~/.local/bin/netcoredbg
 ```
 
 Also:
 
 - Zig: `zls` matching your zig version (e.g. via zvm).
+- fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics. It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
 - Flutter: the SDK from fvm.
 - A [Nerd Font](https://www.nerdfonts.com). Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
 - Completion docs open with `Ctrl+Enter`, which most terminals don't pass through. Ghostty needs this (it conflicts with many common binds, such as ones in lazygit):
