@@ -9,6 +9,9 @@ return {
   opts = {
     keymap = {
       preset = 'none',
+      -- Vim's own completion keys: open the menu, then move through it
+      ['<C-n>'] = { 'show', 'select_next', 'fallback' },
+      ['<C-p>'] = { 'show', 'select_prev', 'fallback' },
       ['<C-CR>'] = { 'show', 'show_documentation', 'hide_documentation' },
       ['<C-e>'] = { 'hide', 'fallback' },
       ['<CR>'] = { 'accept', 'fallback' },
