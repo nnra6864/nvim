@@ -29,7 +29,7 @@ local function overrides(theme)
       if name:find '^BlinkCmp' then vim.cmd.highlight(name .. ' guibg=NONE ctermbg=NONE') end
     end
   end
-  for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection', 'BlinkCmpScrollBarThumb', 'MiniPickMatchCurrent' } do
+  for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection', 'BlinkCmpScrollBarThumb', 'SnacksPickerListCursorLine' } do
     vim.api.nvim_set_hl(0, group, { bg = M.get 'blue', bold = true })
   end
 end
@@ -41,15 +41,17 @@ local transparent_groups = {
   'TabLineFill', 'TabLineSel', 'TelescopeNormal', 'TelescopeBorder', 'Folded', 'FoldColumn',
 }
 
-local function apply()
+--- Applies theme.lua. Skipped when it hasn't changed since the last apply, unless forced
+--- (colors/ricer.lua forces it, so `:colorscheme ricer` brings the theme back).
+function M.apply(force)
   local file = io.open(path)
   if not file then
-    if not applied then require('base16-colorscheme').setup() end
+    if not applied or force then require('base16-colorscheme').setup() end
     return
   end
   local src = file:read '*a'
   file:close()
-  if src == applied then return end
+  if src == applied and not force then return end
 
   -- Ricer may still be mid-write; a broken or empty file is skipped and the next event retries
   local chunk = load(src, '@' .. path)
@@ -65,19 +67,21 @@ local function apply()
     end
   end
   overrides(theme)
+  -- A real name lets pickers restore this theme after previewing others
+  vim.g.colors_name = 'ricer'
   -- base16 doesn't fire this itself; the statusline and mini need it to re-derive colors
-  vim.api.nvim_exec_autocmds('ColorScheme', { pattern = 'base16' })
+  vim.api.nvim_exec_autocmds('ColorScheme', { pattern = 'ricer' })
 end
 
 function M.setup()
-  apply()
+  M.apply()
 
   local watcher, timer = vim.uv.new_fs_event(), vim.uv.new_timer()
   if not (watcher and timer) then return end
   -- The directory is watched, not the file, because Ricer may replace the file (new inode)
   watcher:start(dir, {}, function(err, name)
     if err or name ~= 'theme.lua' then return end
-    timer:start(100, 0, vim.schedule_wrap(apply))
+    timer:start(100, 0, vim.schedule_wrap(M.apply))
   end)
 end
 
