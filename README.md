@@ -1,6 +1,7 @@
 # nvim
 
-Personal Neovim config. One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/config/keymaps.lua`](lua/config/keymaps.lua). CC0.
+Personal Neovim config.<br>
+One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/config/keymaps.lua`](lua/config/keymaps.lua).
 
 ## Features
 
