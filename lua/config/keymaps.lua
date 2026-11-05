@@ -30,6 +30,33 @@ map('n', '<C-j>', '<C-w>j', { desc = 'Focus down' })
 map('n', '<C-k>', '<C-w>k', { desc = 'Focus up' })
 map('n', '<C-l>', '<C-w>l', { desc = 'Focus right' })
 
+-- Search (mini.pick; inside a picker: <C-j>/<C-k> move, <Tab> preview, <C-x> mark,
+-- <M-CR> open marked, <C-s>/<C-v> open in split, <C-e> refine)
+local pick = function(name, local_opts, opts)
+  return function() (MiniPick.builtin[name] or MiniExtra.pickers[name])(local_opts, opts) end
+end
+map('n', '<leader>sf', pick 'files', { desc = 'Files' })
+map('n', '<leader>sg', pick 'grep_live', { desc = 'Grep' })
+map('n', '<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end, { desc = 'Word under cursor' })
+map('n', '<leader>s/', pick('buf_lines', { scope = 'all' }), { desc = 'Lines in open buffers' })
+map('n', '<leader>/', pick('buf_lines', { scope = 'current' }), { desc = 'Lines in this buffer' })
+map('n', '<leader><leader>', pick 'buffers', { desc = 'Buffers' })
+map('n', '<leader>s.', pick 'oldfiles', { desc = 'Recent files' })
+map('n', '<leader>sh', pick 'help', { desc = 'Help' })
+map('n', '<leader>sk', pick 'keymaps', { desc = 'Keymaps' })
+map('n', '<leader>sc', pick 'commands', { desc = 'Commands' })
+map('n', '<leader>so', pick 'options', { desc = 'Options' })
+map('n', '<leader>sd', pick 'diagnostic', { desc = 'Diagnostics' })
+map('n', '<leader>sr', pick 'resume', { desc = 'Resume last search' })
+map('n', '<leader>sn', pick('files', nil, { source = { cwd = vim.fn.stdpath 'config' } }), { desc = 'Neovim config' })
+map('n', '<leader>ss', function()
+  local names = vim.tbl_keys(MiniPick.registry)
+  table.sort(names)
+  vim.ui.select(names, { prompt = 'Pickers' }, function(name)
+    if name then vim.schedule(MiniPick.registry[name]) end
+  end)
+end, { desc = 'All pickers' })
+
 -- Indent
 local indent = function(...)
   local args = { ... }
@@ -42,14 +69,20 @@ map('n', '<leader>it', function() require('config.indent').toggle_tabs() end, { 
 map('n', '<leader>ig', '<cmd>GuessIndent<CR>', { desc = 'Guess indent from file' })
 map('n', '<leader>ir', '<cmd>retab!<CR>', { desc = 'Convert file to current tabs/spaces' })
 
--- LSP. Built in: grn rename, gra code action, grr references, gri implementation,
--- grt type definition, gO document symbols, K hover, <C-s> signature help (insert)
+-- LSP. Built in: grn rename, gra code action, K hover, <C-s> signature help (insert).
+-- The jumps below replace the built-in quickfix versions with pickers.
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('lsp-keymaps', { clear = true }),
   callback = function(args)
     local function bmap(lhs, rhs, desc) map('n', lhs, rhs, { buffer = args.buf, desc = desc }) end
-    bmap('gd', vim.lsp.buf.definition, 'Go to definition')
-    bmap('gD', vim.lsp.buf.declaration, 'Go to declaration')
+    local lsp = function(scope) return pick('lsp', { scope = scope }) end
+    bmap('gd', lsp 'definition', 'Go to definition')
+    bmap('gD', lsp 'declaration', 'Go to declaration')
+    bmap('grr', lsp 'references', 'References')
+    bmap('gri', lsp 'implementation', 'Implementations')
+    bmap('grt', lsp 'type_definition', 'Type definition')
+    bmap('gO', lsp 'document_symbol', 'Symbols in file')
+    bmap('gW', lsp 'workspace_symbol_live', 'Symbols in workspace')
     bmap('<leader>th', function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = args.buf }, { bufnr = args.buf })
     end, 'Toggle inlay hints')

@@ -29,7 +29,7 @@ local function overrides(theme)
       if name:find '^BlinkCmp' then vim.cmd.highlight(name .. ' guibg=NONE ctermbg=NONE') end
     end
   end
-  for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection' } do
+  for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection', 'BlinkCmpScrollBarThumb', 'MiniPickMatchCurrent' } do
     vim.api.nvim_set_hl(0, group, { bg = M.get 'blue', bold = true })
   end
 end

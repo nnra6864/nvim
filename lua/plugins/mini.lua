@@ -42,6 +42,18 @@ return {
     require('mini.pairs').setup()
     require('mini.move').setup()
 
+    -- Picker. <C-Space> (refine) is usually taken by tmux, so it moves to <C-e>
+    local centered = function()
+      local height, width = math.floor(0.6 * vim.o.lines), math.floor(0.6 * vim.o.columns)
+      return { anchor = 'NW', height = height, width = width, row = math.floor((vim.o.lines - height) / 2), col = math.floor((vim.o.columns - width) / 2) }
+    end
+    require('mini.pick').setup {
+      mappings = { move_down = '<C-j>', move_up = '<C-k>', refine = '<C-e>', refine_marked = '<M-e>' },
+      window = { config = centered },
+    }
+    require('mini.extra').setup()
+    vim.ui.select = MiniPick.ui_select
+
     -- Git
     require('mini.git').setup()
     require('mini.diff').setup {
