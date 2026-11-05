@@ -30,8 +30,23 @@ return {
     image = {
       enabled = true,
       formats = {
-        'png', 'jpg', 'jpeg', 'jxl', 'gif', 'bmp', 'webp', 'tiff', 'heic', 'avif',
-        'mp4', 'mov', 'avi', 'mkv', 'webm', 'pdf', 'icns',
+        'png',
+        'jpg',
+        'jpeg',
+        'jxl',
+        'gif',
+        'bmp',
+        'webp',
+        'tiff',
+        'heic',
+        'avif',
+        'mp4',
+        'mov',
+        'avi',
+        'mkv',
+        'webm',
+        'pdf',
+        'icns',
       },
     },
     statuscolumn = { enabled = true },
@@ -43,9 +58,8 @@ return {
     },
     indent = {
       enabled = true,
-      -- Always 100ms, however big the scope: the duration is min(step * lines, total),
-      -- and the default step can't be removed, only made large enough to never win
-      animate = { duration = { step = 1000, total = 100 } },
+      -- Constant speed: `step` ms per line, capped at `total` ms for big scopes
+      animate = { duration = { step = 10, total = 200 } },
     },
     -- ii/ai select the current indent scope, [i ]i jump to its edges
     scope = { enabled = true },
