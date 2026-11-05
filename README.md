@@ -5,12 +5,16 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 
 ## Features
 
-- **Languages**: LSP, treesitter, formatting and debugging for C/C++, C#, Zig, Dart/Flutter, Python, Lua, Bash, fish, Markdown, Typst and YAML. Servers that aren't installed are skipped.
+- **Languages**: LSP, treesitter, formatting and debugging for C/C++, C#, Zig, Dart/Flutter, Python, Lua, Bash, fish, Markdown, Typst and YAML.<br>
+  Servers that aren't installed are skipped.
 - **Theme**: base16, live-reloaded from [Ricer](lua/config/colors.lua), with an oh-my-posh style statusline.
-- **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`). Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.
+- **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
+  Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.
 - **Git**: lazygit, VSCode-style diffs between any two commits, file and line history, blame, hunks in the gutter.
-- **Files**: yazi instead of netrw. Renaming or moving a file updates imports and note links.
-- **Formatting** on save only for languages with one official style (Zig, Dart, fish) or projects with their own formatter config. Otherwise `<leader>f`.
+- **Files**: yazi instead of netrw.<br>
+  Renaming or moving a file updates imports and note links.
+- **Formatting** on save only for languages with one official style (Zig, Dart, fish) or projects with their own formatter config.<br>
+  Otherwise `<leader>f`.
 - **Indent**: one width per buffer, from editorconfig, else detected from the file, else per language.
 
 ## Requirements (Arch)
@@ -60,17 +64,22 @@ mkdir -p ~/.local/share/netcoredbg ~/.local/bin && curl -L https://github.com/Sa
 Also:
 
 - Zig: `zls` matching your zig version (e.g. via zvm).
-- fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics. It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
+- fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics.<br>
+  It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
 - Flutter: the SDK from fvm.
-- A [Nerd Font](https://www.nerdfonts.com). Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
-- Completion docs open with `Ctrl+Enter`, which most terminals don't pass through. Ghostty needs this (it conflicts with many common binds, such as ones in lazygit):
+- A [Nerd Font](https://www.nerdfonts.com).<br>
+  Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
+- Completion docs open with `Ctrl+Enter`, which most terminals don't pass through.<br>
+  Ghostty needs this (it conflicts with many common binds, such as ones in lazygit):
 ```
 keybind = ctrl+enter=unbind
 ```
 
 ## Keymaps
 
-Leader is `Space`. Press a group key and wait for which-key to list the rest, or search them all with `<leader>sk`. Built-in Neovim keys are marked *(nvim)*.
+Leader is `Space`.<br>
+Press a group key and wait for which-key to list the rest, or search them all with `<leader>sk`.<br>
+Built-in Neovim keys are marked *(nvim)*.
 
 | Editing | |
 |---|---|
