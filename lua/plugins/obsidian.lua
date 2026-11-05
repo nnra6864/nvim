@@ -29,6 +29,8 @@ return {
     -- Same naming as the Obsidian setup; template and attachment folders come from each vault's settings
     note_id_func = function(title) return os.date '%Y-%m-%d %H-%M' .. (title and ' ' .. title or '') end,
     frontmatter = { enabled = false },
+    -- <CR> toggles a checkbox like the Obsidian app, instead of cycling through ~ ! > first
+    checkbox = { order = { ' ', 'x' } },
     link = { auto_update = true },
   },
 }
