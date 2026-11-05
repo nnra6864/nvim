@@ -11,6 +11,17 @@ map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 map('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Diagnostics to loclist' })
 map('n', '<leader>n', function() MiniNotify.show_history() end, { desc = 'Notification history' })
 
+-- Completion (the in-menu keys live in plugins/blink.lua)
+map('n', '<leader>tg', function()
+  vim.g.ghost_text = vim.g.ghost_text == false
+  vim.notify('Ghost text ' .. (vim.g.ghost_text and 'on' or 'off'))
+end, { desc = 'Toggle ghost text' })
+map('n', '<leader>td', function()
+  local docs = require('blink.cmp.config').completion.documentation
+  docs.auto_show = not docs.auto_show
+  vim.notify('Completion docs auto-show ' .. (docs.auto_show and 'on' or 'off'))
+end, { desc = 'Toggle completion docs auto-show' })
+
 -- Windows (move them with the built-in <C-w>H/J/K/L; Alt+hjkl moves lines)
 map('n', '<leader>|', '<C-w>v', { desc = 'Split vertically' })
 map('n', '<leader>-', '<C-w>s', { desc = 'Split horizontally' })
