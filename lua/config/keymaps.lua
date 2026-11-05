@@ -22,6 +22,13 @@ map('n', '<leader>td', function()
   vim.notify('Completion docs auto-show ' .. (docs.auto_show and 'on' or 'off'))
 end, { desc = 'Toggle completion docs auto-show' })
 
+-- Formatting (when it runs on save is decided in plugins/conform.lua)
+map({ 'n', 'x' }, '<leader>f', function() require('conform').format { async = true } end, { desc = 'Format' })
+map('n', '<leader>tf', function()
+  vim.g.format_on_save = vim.g.format_on_save == false
+  vim.notify('Format on save ' .. (vim.g.format_on_save and 'on' or 'off'))
+end, { desc = 'Toggle format on save' })
+
 -- Windows (move them with the built-in <C-w>H/J/K/L; Alt+hjkl moves lines)
 map('n', '<leader>|', '<C-w>v', { desc = 'Split vertically' })
 map('n', '<leader>-', '<C-w>s', { desc = 'Split horizontally' })
