@@ -92,8 +92,25 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- Git. Hunks (mini.diff): [h ]h jump, gh/gH apply/reset (works with motions, e.g. ghgh).
 -- Inside CodeDiff: ]c [c hunks, ]f [f files, t side-by-side/inline, - stage, g? help
+-- Repo of the current file, else of the cwd
+local function git_root()
+  local file = vim.bo.buftype == '' and vim.api.nvim_buf_get_name(0) or ''
+  return vim.fs.root(file ~= '' and vim.fs.dirname(file) or vim.fn.getcwd(), '.git')
+end
+-- CodeDiff reads submodules as files and errors on them, so their paths are left out
+local function codediff(...)
+  local root = git_root()
+  if not root then return vim.notify('Not in a git repository', vim.log.levels.WARN) end
+  local args = { '--repo', root, ... }
+  local subs = vim.fn.systemlist { 'git', '-C', root, 'config', '--file', '.gitmodules', '--get-regexp', '\\.path$' }
+  if vim.v.shell_error == 0 and #subs > 0 then
+    vim.list_extend(args, { '--', '.' })
+    for _, line in ipairs(subs) do table.insert(args, ':(exclude)' .. line:match '%S+$') end
+  end
+  vim.cmd.CodeDiff(args)
+end
 map('n', '<leader>gg', function() Snacks.lazygit() end, { desc = 'Lazygit' })
-map('n', '<leader>gd', '<cmd>CodeDiff<CR>', { desc = 'Diff changes (and resolve conflicts)' })
+map('n', '<leader>gd', codediff, { desc = 'Diff changes (and resolve conflicts)' })
 map('n', '<leader>gh', '<cmd>CodeDiff history %<CR>', { desc = 'History of this file' })
 map('x', '<leader>gh', ':CodeDiff history<CR>', { desc = 'History of these lines' })
 map('n', '<leader>gH', '<cmd>CodeDiff history<CR>', { desc = 'History of the repo' })
@@ -101,6 +118,7 @@ map('n', '<leader>gH', '<cmd>CodeDiff history<CR>', { desc = 'History of the rep
 map('n', '<leader>gc', function()
   Snacks.picker.git_log {
     title = 'Commit (mark two with Tab to compare)',
+    cwd = git_root(),
     confirm = function(picker)
       local items = picker:selected { fallback = true }
       picker:close()
@@ -108,7 +126,7 @@ map('n', '<leader>gc', function()
       table.sort(items, function(a, b) return a.idx > b.idx end)
       local old, new = items[1].commit, items[#items].commit
       if old == new then old = new .. '^' end
-      vim.cmd.CodeDiff { old, new }
+      codediff(old, new)
     end,
   }
 end, { desc = 'Diff commits' })
