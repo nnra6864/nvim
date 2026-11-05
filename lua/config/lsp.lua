@@ -38,8 +38,11 @@ vim.diagnostic.config {
 vim.api.nvim_create_autocmd('LspProgress', {
   group = vim.api.nvim_create_augroup('lsp-progress', { clear = true }),
   callback = function(ev)
+    local status = vim.lsp.status()
+    -- Empty once every server is done; the notification is removed instead of left blank
+    if status == '' then return Snacks.notifier.hide 'lsp_progress' end
     local done = ev.data.params.value.kind == 'end'
-    vim.notify(vim.lsp.status(), vim.log.levels.INFO, {
+    vim.notify(status, vim.log.levels.INFO, {
       id = 'lsp_progress',
       title = 'LSP',
       icon = done and ' ' or '󰔟 ',

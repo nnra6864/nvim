@@ -59,6 +59,9 @@ map('n', '<C-l>', '<C-w>l', { desc = 'Focus right' })
 map({ 'n', 'x' }, '<leader>ee', '<cmd>Yazi<CR>', { desc = 'Yazi at current file' })
 map('n', '<leader>ew', '<cmd>Yazi cwd<CR>', { desc = 'Yazi in working directory' })
 map('n', '<leader>er', '<cmd>Yazi toggle<CR>', { desc = 'Resume last yazi session' })
+-- Rename/move the current file; imports and note links are updated (config/files.lua)
+map('n', '<leader>eR', function() require('config.files').rename() end, { desc = 'Rename file' })
+map('n', '<leader>em', function() require('config.files').move_to_folder() end, { desc = 'Move file to folder' })
 
 -- Search (snacks.picker). Inside a picker: <C-j>/<C-k> move, <Tab> mark, <C-q> marked to
 -- quickfix, <C-s>/<C-v> open in split, <A-p> toggle preview, <A-h>/<A-i> hidden/ignored files
