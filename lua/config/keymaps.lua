@@ -31,6 +31,20 @@ map('n', '<leader>it', function() require('config.indent').toggle_tabs() end, { 
 map('n', '<leader>ig', '<cmd>GuessIndent<CR>', { desc = 'Guess indent from file' })
 map('n', '<leader>ir', '<cmd>retab!<CR>', { desc = 'Convert file to current tabs/spaces' })
 
+-- LSP. Built in: grn rename, gra code action, grr references, gri implementation,
+-- grt type definition, gO document symbols, K hover, <C-s> signature help (insert)
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('lsp-keymaps', { clear = true }),
+  callback = function(args)
+    local function bmap(lhs, rhs, desc) map('n', lhs, rhs, { buffer = args.buf, desc = desc }) end
+    bmap('gd', vim.lsp.buf.definition, 'Go to definition')
+    bmap('gD', vim.lsp.buf.declaration, 'Go to declaration')
+    bmap('<leader>th', function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = args.buf }, { bufnr = args.buf })
+    end, 'Toggle inlay hints')
+  end,
+})
+
 -- Git
 map('n', '<leader>go', function() MiniDiff.toggle_overlay() end, { desc = 'Toggle inline diff' })
 map({ 'n', 'x' }, '<leader>gb', function() MiniGit.show_at_cursor() end, { desc = 'Blame/commit at cursor' })

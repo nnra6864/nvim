@@ -7,6 +7,7 @@ vim.o.cursorline = true
 vim.o.signcolumn = 'yes'
 vim.o.showmode = false
 vim.o.scrolloff = 10
+vim.o.winborder = 'rounded'
 
 -- Per-buffer indent is handled in config/indent.lua
 vim.o.tabstop = 4
