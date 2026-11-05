@@ -25,14 +25,33 @@ return {
     notifier = { enabled = true },
     -- Highlights other uses of the symbol under the cursor; ]] [[ jump between them
     words = { enabled = true },
-    -- Images inline in Markdown/Typst, and image files opened directly
-    image = { enabled = true },
+    -- Images inline in Markdown/Typst, and image files opened directly.
+    -- The full list is needed to add jxl (lists replace the defaults by position)
+    image = {
+      enabled = true,
+      formats = {
+        'png', 'jpg', 'jpeg', 'jxl', 'gif', 'bmp', 'webp', 'tiff', 'heic', 'avif',
+        'mp4', 'mov', 'avi', 'mkv', 'webm', 'pdf', 'icns',
+      },
+    },
     statuscolumn = { enabled = true },
     -- Every view change is animated (<C-d>, gg, searches, zz, ...); mouse wheel is left to the terminal
-    scroll = { enabled = true },
+    scroll = {
+      enabled = true,
+      animate = { easing = 'outExpo' },
+      animate_repeat = { easing = 'outExpo' },
+    },
     indent = {
       enabled = true,
-      animate = { duration = { step = 10, total = 100 } },
+      -- Always 100ms, however big the scope: the duration is min(step * lines, total),
+      -- and the default step can't be removed, only made large enough to never win
+      animate = { duration = { step = 1000, total = 100 } },
+    },
+    -- Same info level for on and off (snacks warns on off by default)
+    toggle = {
+      notify = function(on, opts)
+        vim.notify((on and 'Enabled ' or 'Disabled ') .. opts.name, vim.log.levels.INFO, { title = opts.name })
+      end,
     },
     -- ii/ai select the current indent scope, [i ]i jump to its edges
     scope = { enabled = true },
