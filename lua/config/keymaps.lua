@@ -21,3 +21,15 @@ map('n', '<A-h>', '<C-w>H', { desc = 'Move window left' })
 map('n', '<A-j>', '<C-w>J', { desc = 'Move window down' })
 map('n', '<A-k>', '<C-w>K', { desc = 'Move window up' })
 map('n', '<A-l>', '<C-w>L', { desc = 'Move window right' })
+
+-- Indent
+local indent = function(...)
+  local args = { ... }
+  return function() require('config.indent').set(unpack(args)) end
+end
+map('n', '<leader>i2', indent(2), { desc = 'Indent width 2' })
+map('n', '<leader>i4', indent(4), { desc = 'Indent width 4' })
+map('n', '<leader>i8', indent(8), { desc = 'Indent width 8' })
+map('n', '<leader>it', function() require('config.indent').toggle_tabs() end, { desc = 'Toggle tabs/spaces' })
+map('n', '<leader>ig', '<cmd>GuessIndent<CR>', { desc = 'Guess indent from file' })
+map('n', '<leader>ir', '<cmd>retab!<CR>', { desc = 'Convert file to current tabs/spaces' })
