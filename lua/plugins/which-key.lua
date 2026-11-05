@@ -13,6 +13,7 @@ return {
       { '<leader>o', group = 'Notes' },
       { '<leader>g', group = 'Git' },
       { '<leader>i', group = 'Indent' },
+      { 'gs', group = 'Surround' },
       { 'gr', group = 'LSP' },
     },
   },

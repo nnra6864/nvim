@@ -28,7 +28,10 @@ return {
 
     -- Editing
     require('mini.ai').setup { n_lines = 500 }
-    require('mini.surround').setup()
+    -- Under gs, since flash uses s: gsa add, gsd delete, gsr replace, gsf/gsF find, gsh highlight
+    require('mini.surround').setup {
+      mappings = { add = 'gsa', delete = 'gsd', find = 'gsf', find_left = 'gsF', highlight = 'gsh', replace = 'gsr', update_n_lines = 'gsn' },
+    }
     require('mini.align').setup()
     require('mini.pairs').setup()
     require('mini.move').setup()

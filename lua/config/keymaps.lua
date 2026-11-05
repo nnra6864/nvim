@@ -15,6 +15,15 @@ map('n', '<leader>Z', function() Snacks.zen.zoom() end, { desc = 'Zoom window' }
 map({ 'n', 't' }, ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
 map({ 'n', 't' }, '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
 
+-- Flash: s jump, S select a syntax block, r/R act on a distant spot in operators (yr, dR, ...)
+local flash = function(fn)
+  return function() require('flash')[fn]() end
+end
+map({ 'n', 'x', 'o' }, 's', flash 'jump', { desc = 'Flash jump' })
+map({ 'n', 'x', 'o' }, 'S', flash 'treesitter', { desc = 'Flash select syntax block' })
+map('o', 'r', flash 'remote', { desc = 'Flash remote' })
+map({ 'o', 'x' }, 'R', flash 'treesitter_search', { desc = 'Flash search syntax blocks' })
+map('c', '<C-s>', flash 'toggle', { desc = 'Toggle flash labels in search' })
 map('n', 'gC', function() require('treesitter-context').go_to_context(vim.v.count1) end, { desc = 'Go to pinned context' })
 
 -- Formatting (when it runs on save is decided in plugins/conform.lua)
@@ -80,7 +89,10 @@ map('n', '<leader>sF', function() require('grug-far').open { prefills = { paths 
 -- Notes (obsidian.nvim). Work from anywhere: they use the current vault, or the last one used
 local obsidian = function(cmd)
   return function()
-    if not require('config.notes').current() then return vim.notify('No Obsidian vault found', vim.log.levels.WARN) end
+    local vault = require('config.notes').current()
+    if not vault then return vim.notify('No Obsidian vault found', vim.log.levels.WARN) end
+    local ws = require('config.notes').activate(vault)
+    if ws and ws ~= Obsidian.workspace then require('obsidian.workspace').set(ws) end
     vim.cmd('Obsidian ' .. cmd)
   end
 end
@@ -88,7 +100,18 @@ map('n', '<leader>oo', obsidian 'quick_switch', { desc = 'Find note' })
 map('n', '<leader>os', obsidian 'search', { desc = 'Search notes' })
 map('n', '<leader>on', function() require('config.notes').new() end, { desc = 'New note' })
 map('n', '<leader>ot', function() require('config.notes').new(true) end, { desc = 'New TODO (moves open tasks over)' })
+map('n', '<leader>od', function() require('config.notes').todo() end, { desc = 'Latest TODO' })
 map('n', '<leader>oN', obsidian 'new_from_template', { desc = 'New note from template' })
+-- In vault notes: ]t [t step through TODO notes by date
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('notes-keymaps', { clear = true }),
+  pattern = 'markdown',
+  callback = function(args)
+    if not require('config.notes').root(vim.api.nvim_buf_get_name(args.buf)) then return end
+    map('n', ']t', function() require('config.notes').todo(1) end, { buffer = args.buf, desc = 'Next TODO note' })
+    map('n', '[t', function() require('config.notes').todo(-1) end, { buffer = args.buf, desc = 'Previous TODO note' })
+  end,
+})
 map('n', '<leader>ob', obsidian 'backlinks', { desc = 'Backlinks' })
 map('n', '<leader>ol', obsidian 'links', { desc = 'Links in note' })
 map('n', '<leader>og', obsidian 'tags', { desc = 'Tags' })

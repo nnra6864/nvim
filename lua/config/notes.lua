@@ -21,6 +21,43 @@ function M.current()
   if ok and lines[1] and vim.uv.fs_stat(lines[1] .. '/.obsidian') then return lines[1] end
 end
 
+-- Folders and formats from the vault's own Obsidian settings, so every vault behaves the way
+-- it's set up in the app (and no folder gets created in a vault that doesn't use it)
+local function vault_settings(vault)
+  local function json(name)
+    local ok, data = pcall(function() return vim.json.decode(table.concat(vim.fn.readfile(vault .. '/.obsidian/' .. name), '\n')) end)
+    return ok and type(data) == 'table' and data or {}
+  end
+  local app, templates = json 'app.json', json 'templates.json'
+  return {
+    templates = { folder = templates.folder or vim.NIL, date_format = templates.dateFormat, time_format = templates.timeFormat },
+    attachments = { folder = app.attachmentFolderPath },
+  }
+end
+
+--- Loads obsidian.nvim (if needed) and registers `vault` with it.
+--- obsidian.nvim only resolves workspaces once, at setup, so vaults opened later are added here.
+function M.activate(vault)
+  M.remember(vault)
+  require('lazy').load { plugins = { 'obsidian.nvim' } }
+  local Workspace = require 'obsidian.workspace'
+  local real = vim.uv.fs_realpath(vault) or vault
+  local ws
+  for _, w in ipairs(Obsidian.workspaces) do
+    if tostring(w.root) == real then ws = w end
+  end
+  if not ws then
+    ws = Workspace.new { name = vim.fn.fnamemodify(vault, ':~'), path = vault }
+    if not ws then return end
+    table.insert(Obsidian.workspaces, ws)
+  end
+  if not ws.overrides then
+    ws.overrides = vault_settings(vault)
+    if ws == Obsidian.workspace then Workspace.set(ws) end
+  end
+  return ws
+end
+
 local function frontmatter(tags)
   local lines = { '---', 'created: ' .. os.date '%Y-%m-%d %H:%M', 'tags:' }
   for _, tag in ipairs(tags) do
@@ -166,6 +203,37 @@ end
 
 local stamp = '^%d%d%d%d%-%d%d%-%d%d %d%d%-%d%d'
 
+--- TODO notes in the vault root, oldest first
+local function todos(vault)
+  local list = {}
+  for file, type in vim.fs.dir(vault) do
+    if type == 'file' and file:match(stamp .. ' TODO%.md$') then table.insert(list, file) end
+  end
+  table.sort(list)
+  return list
+end
+
+--- Opens the latest TODO note, or with `step` the next (1) or previous (-1) one from this note
+function M.todo(step)
+  local vault = M.current()
+  if not vault then return vim.notify('Not in an Obsidian vault, and none used before', vim.log.levels.WARN) end
+  local list, target = todos(vault), nil
+  if #list == 0 then return vim.notify 'No TODO notes yet' end
+  if not step then
+    target = list[#list]
+  else
+    local here = vim.fn.expand '%:t'
+    for i = step > 0 and 1 or #list, step > 0 and #list or 1, step do
+      if (step > 0 and list[i] > here) or (step < 0 and list[i] < here) then
+        target = list[i]
+        break
+      end
+    end
+    if not target then return vim.notify(step > 0 and 'Already at the latest TODO' or 'Already at the oldest TODO') end
+  end
+  vim.cmd.edit(vim.fn.fnameescape(vault .. '/' .. target))
+end
+
 --- New note named after the current time, like the Obsidian setup.
 --- `todo` also moves the open tasks of the latest TODO note into it.
 function M.new(todo)
@@ -179,14 +247,17 @@ function M.new(todo)
   local lines = frontmatter(todo and { 'note', 'todo' } or { 'note' })
   local header = #lines
   if todo then
-    local previous
-    for file, type in vim.fs.dir(vault) do
-      if type == 'file' and file:match(stamp .. ' TODO%.md$') and (not previous or file > previous) then previous = file end
-    end
+    local list = todos(vault)
+    local previous = list[#list]
     if previous then
       local keep, move = M.carry_over(read(vault .. '/' .. previous))
       write(vault .. '/' .. previous, keep)
       vim.list_extend(lines, move)
+      -- Open items under a task marked done aren't carried over
+      local left = #vim.tbl_filter(function(line) return line:match '^%s*[-*+] %[ %]' end, keep)
+      if left > 0 then
+        vim.notify(('%d unfinished item(s) stayed in %s, under tasks marked done'):format(left, previous), vim.log.levels.WARN)
+      end
     end
   end
   -- An empty line to start typing on
