@@ -9,6 +9,9 @@ M.colors = {
   modes = { Normal = 'base0D', Insert = 'base0B', Visual = 'base0E', Replace = 'base08', Command = 'base0A', Other = 'base0C' },
   -- HSV value added per segment towards the middle, in percent
   step = 10,
+  -- Applied to the outermost segment. Ricer only exports the bright variants to base16
+  -- (base0D = br_blue = blue v+10), so stepping back once recovers the regular color.
+  offset = -10,
 }
 
 local depth = 3 -- segments per side, outermost first
@@ -24,7 +27,7 @@ local function brighten(hex, percent)
   local rgb = { tonumber(hex:sub(2, 3), 16), tonumber(hex:sub(4, 5), 16), tonumber(hex:sub(6, 7), 16) }
   local max = math.max(unpack(rgb))
   if max == 0 then return hex end
-  local k = math.min(255, max + percent * 2.55) / max
+  local k = math.max(0, math.min(255, max + percent * 2.55)) / max
   return ('#%02x%02x%02x'):format(rgb[1] * k + 0.5, rgb[2] * k + 0.5, rgb[3] * k + 0.5)
 end
 
@@ -34,7 +37,7 @@ function M.highlight()
   local fg = color(M.colors.fg)
   for mode, key in pairs(M.colors.modes) do
     for i = 1, depth do
-      local bg = brighten(color(key), (i - 1) * M.colors.step)
+      local bg = brighten(color(key), M.colors.offset + (i - 1) * M.colors.step)
       vim.api.nvim_set_hl(0, ('Stl%s%d'):format(mode, i), { fg = fg, bg = bg, bold = i == 1 })
       vim.api.nvim_set_hl(0, ('Stl%s%dSep'):format(mode, i), { fg = bg, bg = line_bg })
     end
