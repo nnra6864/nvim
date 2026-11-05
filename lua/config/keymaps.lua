@@ -90,6 +90,27 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
--- Git
+-- Git. Hunks (mini.diff): [h ]h jump, gh/gH apply/reset (works with motions, e.g. ghgh).
+-- Inside CodeDiff: ]c [c hunks, ]f [f files, t side-by-side/inline, - stage, g? help
+map('n', '<leader>gg', function() Snacks.lazygit() end, { desc = 'Lazygit' })
+map('n', '<leader>gd', '<cmd>CodeDiff<CR>', { desc = 'Diff changes (and resolve conflicts)' })
+map('n', '<leader>gh', '<cmd>CodeDiff history %<CR>', { desc = 'History of this file' })
+map('x', '<leader>gh', ':CodeDiff history<CR>', { desc = 'History of these lines' })
+map('n', '<leader>gH', '<cmd>CodeDiff history<CR>', { desc = 'History of the repo' })
+-- Pick one commit to see its changes, or mark two with <Tab> to diff them against each other
+map('n', '<leader>gc', function()
+  Snacks.picker.git_log {
+    title = 'Commit (mark two with Tab to compare)',
+    confirm = function(picker)
+      local items = picker:selected { fallback = true }
+      picker:close()
+      -- The log lists newest first, so a higher idx is older
+      table.sort(items, function(a, b) return a.idx > b.idx end)
+      local old, new = items[1].commit, items[#items].commit
+      if old == new then old = new .. '^' end
+      vim.cmd.CodeDiff { old, new }
+    end,
+  }
+end, { desc = 'Diff commits' })
 map('n', '<leader>go', function() MiniDiff.toggle_overlay() end, { desc = 'Toggle inline diff' })
 map({ 'n', 'x' }, '<leader>gb', function() MiniGit.show_at_cursor() end, { desc = 'Blame/commit at cursor' })
