@@ -11,6 +11,8 @@ sudo pacman -S --needed clang lua-language-server marksman ruff ty tinymist \
   bash-language-server shellcheck yaml-language-server
 dotnet tool install --global roslyn-language-server --prerelease   # C#
 paru -S fish-lsp                                                   # fish (AUR)
+# Formatters (clang, ruff, fish and zig bring their own)
+sudo pacman -S --needed stylua shfmt jq
 ```
 
 - Zig: install `zls` matching your zig version (e.g. via zvm).
