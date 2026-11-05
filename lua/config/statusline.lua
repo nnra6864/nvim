@@ -22,26 +22,13 @@ M.colors = {
   offset = -10,
 }
 
--- Ricer exports the named colors in theme.lua; stock base16 schemes only have base16 slots,
--- mapped the way base16 terminal themes do it
-local fallback = {
-  black = 'base00', red = 'base08', green = 'base0B', yellow = 'base0A',
-  blue = 'base0D', magenta = 'base0E', cyan = 'base0C', white = 'base05',
-}
-for name, slot in pairs(vim.deepcopy(fallback)) do fallback['br_' .. name] = slot end
-fallback.br_black, fallback.br_white = 'base03', 'base07'
-
 local depth = 3 -- segments per side, outermost first
 
 local glyphs = vim.g.have_nerd_font
     and { cap_l = '\u{e0b6}', cap_r = '\u{e0b4}', arrow_r = '\u{e0b0}', arrow_l = '\u{e0b2}', notch_l = '\u{e0d7}', notch_r = '\u{e0d6}' }
   or { cap_l = '', cap_r = '', arrow_r = '', arrow_l = '', notch_l = '', notch_r = '' }
 
-local function color(name)
-  if name:sub(1, 1) == '#' then return name end
-  local palette = require('base16-colorscheme').colors
-  return palette[name] or palette[fallback[name]]
-end
+local color = function(name) return require('config.colors').get(name) end
 
 -- Scaling all channels by the same factor changes HSV value but keeps hue and saturation
 local function brighten(hex, percent)

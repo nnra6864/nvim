@@ -6,6 +6,34 @@ local dir = vim.fn.stdpath 'config' .. '/lua'
 local path = dir .. '/theme.lua'
 local applied
 
+-- Ricer exports the terminal palette by name in theme.lua; stock base16 schemes only have
+-- base16 slots, mapped the way base16 terminal themes do it
+local fallback = {
+  black = 'base00', red = 'base08', green = 'base0B', yellow = 'base0A',
+  blue = 'base0D', magenta = 'base0E', cyan = 'base0C', white = 'base05',
+}
+for name, slot in pairs(vim.deepcopy(fallback)) do fallback['br_' .. name] = slot end
+fallback.br_black, fallback.br_white = 'base03', 'base07'
+
+--- Hex for a palette name ('blue', 'br_blue'), a base16 key ('base05') or a hex code
+function M.get(name)
+  if name:sub(1, 1) == '#' then return name end
+  local palette = require('base16-colorscheme').colors
+  return palette[name] or palette[fallback[name]]
+end
+
+-- Applied after every theme load, on top of base16
+local function overrides(theme)
+  if type(theme) == 'table' and theme.transparent then
+    for name in pairs(vim.api.nvim_get_hl(0, {})) do
+      if name:find '^BlinkCmp' then vim.cmd.highlight(name .. ' guibg=NONE ctermbg=NONE') end
+    end
+  end
+  for _, group in ipairs { 'PmenuSel', 'BlinkCmpMenuSelection' } do
+    vim.api.nvim_set_hl(0, group, { bg = M.get 'blue', bold = true })
+  end
+end
+
 local transparent_groups = {
   'Normal', 'NormalNC', 'NormalFloat', 'FloatBorder', 'FloatTitle', 'SignColumn', 'LineNr',
   'CursorLine', 'CursorLineNr', 'CursorLineSign', 'EndOfBuffer', 'NonText', 'StatusLine',
@@ -36,6 +64,7 @@ local function apply()
       vim.cmd.highlight(g .. ' guibg=NONE ctermbg=NONE')
     end
   end
+  overrides(theme)
   -- base16 doesn't fire this itself; the statusline and mini need it to re-derive colors
   vim.api.nvim_exec_autocmds('ColorScheme', { pattern = 'base16' })
 end
