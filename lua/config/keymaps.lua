@@ -96,6 +96,15 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+-- Typst
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('typst-keymaps', { clear = true }),
+  pattern = 'typst',
+  callback = function(args)
+    map('n', '<leader>tp', '<cmd>TypstPreviewToggle<CR>', { buffer = args.buf, desc = 'Toggle Typst preview' })
+  end,
+})
+
 -- Git. Hunks (mini.diff): [h ]h jump, gh/gH apply/reset (works with motions, e.g. ghgh).
 -- Inside CodeDiff: ]c [c hunks, ]f [f files, t side-by-side/inline, - stage, g? help
 -- Repo of the current file, else of the cwd

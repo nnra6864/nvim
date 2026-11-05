@@ -13,6 +13,8 @@ dotnet tool install --global roslyn-language-server --prerelease   # C#
 paru -S fish-lsp                                                   # fish (AUR)
 # Formatters (clang, ruff, fish and zig bring their own)
 sudo pacman -S --needed stylua shfmt jq
+# Typst preview (with tinymist above)
+sudo pacman -S --needed websocat
 ```
 
 - Zig: install `zls` matching your zig version (e.g. via zvm).
