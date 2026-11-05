@@ -3,8 +3,8 @@
 -- previous one (same as Ricer's prompt_bg_hsv_delta).
 local M = {}
 
--- Pick from: red, green, yellow, blue, magenta, cyan, their br_ variants (br_blue, ...),
--- any base16 key ('base05') or a hex code.
+-- Pick from the terminal palette (black, red, green, yellow, blue, magenta, cyan, white
+-- and their br_ variants like br_blue), any base16 key ('base05') or a hex code.
 -- Re-applied on every theme change.
 M.colors = {
   fg = 'base05',
@@ -22,9 +22,14 @@ M.colors = {
   offset = -10,
 }
 
--- Ricer exports the named colors in theme.lua; stock base16 schemes only have base16 slots
-local fallback = { red = 'base08', yellow = 'base0A', green = 'base0B', cyan = 'base0C', blue = 'base0D', magenta = 'base0E' }
+-- Ricer exports the named colors in theme.lua; stock base16 schemes only have base16 slots,
+-- mapped the way base16 terminal themes do it
+local fallback = {
+  black = 'base00', red = 'base08', green = 'base0B', yellow = 'base0A',
+  blue = 'base0D', magenta = 'base0E', cyan = 'base0C', white = 'base05',
+}
 for name, slot in pairs(vim.deepcopy(fallback)) do fallback['br_' .. name] = slot end
+fallback.br_black, fallback.br_white = 'base03', 'base07'
 
 local depth = 3 -- segments per side, outermost first
 
