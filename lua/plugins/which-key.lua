@@ -8,6 +8,7 @@ return {
     spec = {
       { '<leader>s', group = 'Search' },
       { '<leader>t', group = 'Toggle' },
+      { '<leader>e', group = 'Explore' },
       { '<leader>g', group = 'Git' },
       { '<leader>i', group = 'Indent' },
       { 'gr', group = 'LSP' },

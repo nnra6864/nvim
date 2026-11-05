@@ -37,6 +37,12 @@ map('n', '<C-j>', '<C-w>j', { desc = 'Focus down' })
 map('n', '<C-k>', '<C-w>k', { desc = 'Focus up' })
 map('n', '<C-l>', '<C-w>l', { desc = 'Focus right' })
 
+-- Files (yazi). Inside yazi: <F1> help, <C-v>/<C-x>/<C-t> open in split/tab, <C-s> grep here,
+-- <C-q> selection to quickfix, <C-y> copy relative path
+map({ 'n', 'x' }, '<leader>ee', '<cmd>Yazi<CR>', { desc = 'Yazi at current file' })
+map('n', '<leader>ew', '<cmd>Yazi cwd<CR>', { desc = 'Yazi in working directory' })
+map('n', '<leader>er', '<cmd>Yazi toggle<CR>', { desc = 'Resume last yazi session' })
+
 -- Search (snacks.picker). Inside a picker: <C-j>/<C-k> move, <Tab> mark, <C-q> marked to
 -- quickfix, <C-s>/<C-v> open in split, <A-p> toggle preview, <A-h>/<A-i> hidden/ignored files
 local pick = function(name, opts)

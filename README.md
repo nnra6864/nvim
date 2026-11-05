@@ -5,7 +5,7 @@ Personal Neovim config. Plugins via [lazy.nvim](https://github.com/folke/lazy.nv
 ## Requirements (Arch)
 
 ```sh
-sudo pacman -S --needed neovim git base-devel tree-sitter-cli ripgrep fd
+sudo pacman -S --needed neovim git base-devel tree-sitter-cli ripgrep fd yazi lazygit
 # Language servers, install the ones you need
 sudo pacman -S --needed clang lua-language-server marksman ruff ty tinymist \
   bash-language-server shellcheck yaml-language-server
