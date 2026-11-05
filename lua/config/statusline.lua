@@ -3,16 +3,26 @@
 -- previous one (same as Ricer's prompt_bg_hsv_delta).
 local M = {}
 
--- base16 keys, re-applied on every theme change
+-- Pick from: red, green, yellow, blue, magenta, cyan, any base16 key ('base05') or a hex code.
+-- Re-applied on every theme change.
 M.colors = {
   fg = 'base05',
-  modes = { Normal = 'base0D', Insert = 'base0B', Visual = 'base0E', Replace = 'base08', Command = 'base0A', Other = 'base0C' },
+  modes = {
+    Normal = 'blue',
+    Insert = 'cyan',
+    Visual = 'magenta',
+    Replace = 'red',
+    Command = 'green',
+    Other = 'yellow', -- terminal mode and anything else
+  },
   -- HSV value added per segment towards the middle, in percent
   step = 10,
-  -- Applied to the outermost segment. Ricer only exports the bright variants to base16
-  -- (base0D = br_blue = blue v+10), so stepping back once recovers the regular color.
-  offset = -20,
+  -- HSV value added to the outermost segment, in percent
+  offset = -10,
 }
+
+-- Ricer exports the named colors in theme.lua; stock base16 schemes only have base16 slots
+local fallback = { red = 'base08', yellow = 'base0A', green = 'base0B', cyan = 'base0C', blue = 'base0D', magenta = 'base0E' }
 
 local depth = 3 -- segments per side, outermost first
 
@@ -20,7 +30,11 @@ local glyphs = vim.g.have_nerd_font
     and { cap_l = '\u{e0b6}', cap_r = '\u{e0b4}', arrow_r = '\u{e0b0}', arrow_l = '\u{e0b2}', notch_l = '\u{e0d7}', notch_r = '\u{e0d6}' }
   or { cap_l = '', cap_r = '', arrow_r = '', arrow_l = '', notch_l = '', notch_r = '' }
 
-local function color(key) return require('base16-colorscheme').colors[key] end
+local function color(name)
+  if name:sub(1, 1) == '#' then return name end
+  local palette = require('base16-colorscheme').colors
+  return palette[name] or palette[fallback[name]]
+end
 
 -- Scaling all channels by the same factor changes HSV value but keeps hue and saturation
 local function brighten(hex, percent)
