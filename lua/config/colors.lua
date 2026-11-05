@@ -36,6 +36,8 @@ local function apply()
       vim.cmd.highlight(g .. ' guibg=NONE ctermbg=NONE')
     end
   end
+  -- base16 doesn't fire this itself; the statusline and mini need it to re-derive colors
+  vim.api.nvim_exec_autocmds('ColorScheme', { pattern = 'base16' })
 end
 
 function M.setup()

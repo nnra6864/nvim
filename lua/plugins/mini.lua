@@ -10,14 +10,7 @@ return {
     vim.notify = MiniNotify.make_notify()
 
     -- UI
-    local statusline = require 'mini.statusline'
-    statusline.setup { use_icons = vim.g.have_nerd_font }
-    local fileinfo = statusline.section_fileinfo
-    ---@diagnostic disable-next-line: duplicate-set-field
-    statusline.section_fileinfo = function(args)
-      local indent = (vim.bo.expandtab and '␣' or '⇥') .. vim.fn.shiftwidth()
-      return indent .. ' ' .. fileinfo(args)
-    end
+    require('config.statusline').setup()
 
     require('mini.indentscope').setup { symbol = '│' }
 
