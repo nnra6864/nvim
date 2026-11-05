@@ -31,6 +31,10 @@ function M.move(from, to)
   if vim.uv.fs_stat(to) then return vim.notify('Already exists: ' .. to, vim.log.levels.ERROR) end
 
   local changes = { files = { { oldUri = vim.uri_from_fname(from), newUri = vim.uri_from_fname(to) } } }
+  local unsaved = {}
+  for _, info in ipairs(vim.fn.getbufinfo { bufmodified = 1 }) do
+    unsaved[info.bufnr] = true
+  end
   tell_servers('workspace/willRenameFiles', changes, true)
   vim.fn.mkdir(vim.fs.dirname(to), 'p')
 
@@ -48,6 +52,13 @@ function M.move(from, to)
   end
 
   tell_servers('workspace/didRenameFiles', changes)
+  -- Some servers (obsidian.nvim's) send their edits only after hearing about the rename.
+  -- Save buffers they changed, leaving alone any that already had unsaved edits
+  vim.defer_fn(function()
+    for _, info in ipairs(vim.fn.getbufinfo { bufmodified = 1 }) do
+      if not unsaved[info.bufnr] then vim.api.nvim_buf_call(info.bufnr, function() vim.cmd 'silent update' end) end
+    end
+  end, 500)
 end
 
 --- Prompts for a new name (or path, relative to the file's folder)
