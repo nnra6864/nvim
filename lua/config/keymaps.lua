@@ -47,6 +47,8 @@ map('n', '<leader>sk', pick 'keymaps', { desc = 'Keymaps' })
 map('n', '<leader>sc', pick 'commands', { desc = 'Commands' })
 map('n', '<leader>so', pick 'options', { desc = 'Options' })
 map('n', '<leader>sd', pick 'diagnostic', { desc = 'Diagnostics' })
+-- Only lasts until Ricer writes theme.lua again
+map('n', '<leader>st', pick 'colorschemes', { desc = 'Themes' })
 map('n', '<leader>sr', pick 'resume', { desc = 'Resume last search' })
 map('n', '<leader>sn', pick('files', nil, { source = { cwd = vim.fn.stdpath 'config' } }), { desc = 'Neovim config' })
 map('n', '<leader>ss', function()
