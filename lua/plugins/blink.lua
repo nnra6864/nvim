@@ -32,7 +32,14 @@ return {
       menu = { auto_show = false },
       documentation = { auto_show = true, auto_show_delay_ms = 200 },
       ghost_text = {
-        enabled = function() return vim.g.ghost_text ~= false end,
+        -- Off by default in prose: there LSPs offer little, so snippets with plain-word prefixes
+        -- ("ordered list", "link", ...) fuzzy-match ordinary words and show up as ghost text.
+        -- <leader>tg overrides this per buffer (vim.b.ghost_text).
+        enabled = function()
+          if vim.b.ghost_text ~= nil then return vim.b.ghost_text end
+          local prose = { markdown = true, text = true, gitcommit = true }
+          return vim.g.ghost_text ~= false and not prose[vim.bo.filetype]
+        end,
         show_without_selection = true,
       },
     },

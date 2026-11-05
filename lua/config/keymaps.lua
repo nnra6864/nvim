@@ -31,7 +31,20 @@ map({ 'n', 'x' }, '<leader>f', function() require('conform').format { async = tr
 
 -- Toggles. which-key shows each one's current state
 local function toggle(key, name, get, set) Snacks.toggle.new({ id = name, name = name, get = get, set = set }):map(key) end
-toggle('<leader>tg', 'Ghost text', function() return vim.g.ghost_text ~= false end, function(on) vim.g.ghost_text = on end)
+-- Ghost text is off by default in prose buffers (plugins/blink.lua). Where the buffer's default
+-- differs from the global setting (or it was already overridden), the toggle only affects that buffer.
+local function ghost_text() return require('blink.cmp.config').completion.ghost_text.enabled() end
+toggle('<leader>tg', 'Ghost text', ghost_text, function(on)
+  local override = vim.b.ghost_text
+  vim.b.ghost_text = nil
+  local buffer_default = ghost_text()
+  vim.b.ghost_text = override
+  if override ~= nil or buffer_default ~= (vim.g.ghost_text ~= false) then
+    vim.b.ghost_text = on
+  else
+    vim.g.ghost_text = on
+  end
+end)
 toggle('<leader>td', 'Completion docs', function() return require('blink.cmp.config').completion.documentation.auto_show end,
   function(on) require('blink.cmp.config').completion.documentation.auto_show = on end)
 toggle('<leader>tf', 'Format on save', function() return vim.g.format_on_save ~= false end, function(on) vim.g.format_on_save = on end)
