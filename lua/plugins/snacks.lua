@@ -47,12 +47,6 @@ return {
       -- and the default step can't be removed, only made large enough to never win
       animate = { duration = { step = 1000, total = 100 } },
     },
-    -- Same info level for on and off (snacks warns on off by default)
-    toggle = {
-      notify = function(on, opts)
-        vim.notify((on and 'Enabled ' or 'Disabled ') .. opts.name, vim.log.levels.INFO, { title = opts.name })
-      end,
-    },
     -- ii/ai select the current indent scope, [i ]i jump to its edges
     scope = { enabled = true },
     gitbrowse = {
