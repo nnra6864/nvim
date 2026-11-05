@@ -11,7 +11,7 @@ M.colors = {
   step = 10,
   -- Applied to the outermost segment. Ricer only exports the bright variants to base16
   -- (base0D = br_blue = blue v+10), so stepping back once recovers the regular color.
-  offset = -10,
+  offset = -20,
 }
 
 local depth = 3 -- segments per side, outermost first
