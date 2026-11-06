@@ -6,12 +6,6 @@ local forgejo = {
   commit = '/commit/{commit}',
 }
 
--- snacks.image only knows kitty/ghostty/wezterm by XTVERSION, so under tuios it falls back
--- to showing images only on the cursor line. tuios draws kitty unicode placeholders, so say so.
-if vim.env.TUIOS_SESSION and not vim.env.SNACKS_KITTY then
-  vim.env.SNACKS_KITTY = 'true'
-end
-
 return {
   -- A collection of small plugins; only the modules configured here are enabled
   'folke/snacks.nvim',
