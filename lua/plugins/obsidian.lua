@@ -2,8 +2,9 @@
 -- usual LSP keys work on notes: gd follow link, grr backlinks, grn rename note (updates
 -- every link to it), gra note actions (extract, move, merge, insert template, ...)
 return {
-  'obsidian-nvim/obsidian.nvim',
-  version = '*',
+  -- Fork; tracks a branch, since upstream release tags would skip the fork's commits
+  url = 'https://git.nnstdios.com/nnra6864/obsidian.nvim',
+  branch = 'jxl',
   cmd = 'Obsidian',
   -- Loads for Markdown files inside a vault (any folder with .obsidian), never outside one
   init = function()

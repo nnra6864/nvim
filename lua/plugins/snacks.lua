@@ -8,7 +8,9 @@ local forgejo = {
 
 return {
   -- A collection of small plugins; only the modules configured here are enabled
-  'folke/snacks.nvim',
+  -- Fork with tuios image support, until it's upstreamed
+  url = 'https://git.nnstdios.com/nnra6864/snacks.nvim',
+  branch = 'tuios',
   priority = 1000,
   lazy = false,
   ---@type snacks.Config
