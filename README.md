@@ -120,8 +120,8 @@ Built-in Neovim keys are marked *(nvim)*.
 
 | Files and windows | |
 |---|---|
-| `<leader>ee` `ew` `er` | Yazi at file / in cwd / resume |
-| `<leader>eR` `em` | Rename file / move it to a folder |
+| `<leader>ee` `ew` `eR` | Yazi at file / in cwd / resume |
+| `<leader>er` `em` | Rename file / move it to a folder |
 | `Ctrl+hjkl`, `Ctrl+w HJKL` | Focus window / move window *(nvim)* |
 | `<leader>\|` `<leader>-` | Split vertically / horizontally |
 | `<leader>z` `<leader>Z` | Zen mode / zoom window |
