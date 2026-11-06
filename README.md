@@ -67,6 +67,8 @@ Also:
 - fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics.<br>
   It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
 - Flutter: the SDK from fvm.
+- Theme: Ricer writes it to `lua/theme.lua`, which isn't in the repo.<br>
+  On a fresh clone, apply a theme in Ricer (or copy `lua/theme.lua` over); until then it's stock base16, without transparency.
 - A [Nerd Font](https://www.nerdfonts.com).<br>
   Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
 - Completion docs open with `Ctrl+Enter`, which most terminals don't pass through.<br>
