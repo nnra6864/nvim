@@ -46,9 +46,14 @@ return {
 
     sources = {
       default = { 'lsp', 'path', 'snippets' },
-      per_filetype = { lua = { inherit_defaults = true, 'lazydev' } },
+      per_filetype = {
+        lua = { inherit_defaults = true, 'lazydev' },
+        markdown = { inherit_defaults = true, 'unresolved_links' },
+      },
       providers = {
         lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
+        -- [[links]] to notes that don't exist yet; ranked below existing notes
+        unresolved_links = { name = 'Unresolved', module = 'config.unresolved_links', score_offset = -2 },
       },
     },
 
