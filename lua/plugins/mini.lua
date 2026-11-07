@@ -33,7 +33,39 @@ return {
       mappings = { add = 'gsa', delete = 'gsd', find = 'gsf', find_left = 'gsF', highlight = 'gsh', replace = 'gsr', update_n_lines = 'gsn' },
     }
     require('mini.align').setup()
-    require('mini.pairs').setup()
+    -- Toggle: when true, pairing is context aware (set false for stock mini.pairs).
+    -- Brackets: no pair when a word is right after the cursor (|word -> (word).
+    -- Quotes/backticks: insert a single one when
+    --   - a word is right after the cursor      |a  -> "a
+    --   - the line already has an unclosed one  "a| -> "a"
+    --   - (' only) a letter is right before     don| -> don't
+    -- otherwise pair as usual (a| -> a""). Typing a closer before an existing one jumps over it.
+    local smart_pairs = true
+    local bracket = smart_pairs and '^[^\\][^%w]' or '^[^\\]'
+    require('mini.pairs').setup {
+      mappings = {
+        ['('] = { action = 'open', pair = '()', neigh_pattern = bracket },
+        ['['] = { action = 'open', pair = '[]', neigh_pattern = bracket },
+        ['{'] = { action = 'open', pair = '{}', neigh_pattern = bracket },
+      },
+    }
+    if smart_pairs then
+      -- Overrides mini.pairs' insert-mode quote mappings (pairs stay registered, so <BS> still deletes both)
+      local function smart_quote(q, no_alpha_before)
+        return function()
+          local line, col = vim.api.nvim_get_current_line(), vim.fn.col '.' - 1
+          local before, after = line:sub(1, col), line:sub(col + 1)
+          local prev, next = before:sub(-1), after:sub(1, 1)
+          if next == q then return MiniPairs.closeopen(q .. q, '..') end
+          local _, unescaped = before:gsub('\\.', ''):gsub(vim.pesc(q), '')
+          if prev == '\\' or next:match '[%w_]' or unescaped % 2 == 1 or (no_alpha_before and prev:match '%a') then return q end
+          return MiniPairs.open(q .. q, '..')
+        end
+      end
+      for q, no_alpha_before in pairs { ['"'] = false, ["'"] = true, ['`'] = false } do
+        vim.keymap.set('i', q, smart_quote(q, no_alpha_before), { expr = true, replace_keycodes = false, desc = 'Smart ' .. q })
+      end
+    end
     require('mini.move').setup()
 
     -- Git
