@@ -9,7 +9,8 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
   Servers that aren't installed are skipped.
 - **Theme**: base16, live-reloaded from [Ricer](lua/config/colors.lua), with an oh-my-posh style statusline.
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
-  Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.
+  Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
+  Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer. Files outside vaults never autosave.
 - **Git**: lazygit, VSCode-style diffs between any two commits, file and line history, blame, hunks in the gutter.
 - **Files**: yazi instead of netrw.<br>
   Renaming or moving a file updates imports and note links.
