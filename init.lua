@@ -5,6 +5,7 @@ vim.g.maplocalleader = ' '
 require 'config.options'
 require 'config.indent'
 require 'config.autocmds'
+require 'config.lists'
 require 'config.lazy'
 -- After plugins: snacks toggles are created as the keymaps are defined
 require 'config.keymaps'
