@@ -14,7 +14,16 @@ return {
       ['<C-k>'] = { 'show', 'select_prev', 'fallback' },
       ['<C-CR>'] = { 'show', 'show_documentation', 'hide_documentation' },
       ['<C-e>'] = { 'hide', 'fallback' },
-      ['<CR>'] = { 'accept', 'fallback' },
+      -- In list filetypes, <CR> without a completion continues the list (plugins/bullets.lua)
+      ['<CR>'] = {
+        'accept',
+        function()
+          if not vim.tbl_contains(vim.g.bullets_enabled_file_types or {}, vim.bo.filetype) then return end
+          vim.api.nvim_feedkeys(vim.keycode '<Plug>(bullets-newline)', 'm', false)
+          return true
+        end,
+        'fallback',
+      },
       -- Takes the ghost text (the first item) without opening the menu
       ['<C-y>'] = { 'select_and_accept', 'fallback' },
 
