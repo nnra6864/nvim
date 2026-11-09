@@ -52,3 +52,24 @@ vim.api.nvim_create_autocmd({ 'BufFilePost', 'BufWipeout' }, {
     end
   end,
 })
+
+-- Opening a directory (`nvim .`, `:e dir/`) runs open_directory instead of showing a listing.
+-- Change it to pick something else, e.g. `require('yazi').yazi(nil, dir)` for yazi,
+-- or `vim.cmd.lcd(dir)` first to also make it the working directory
+vim.g.loaded_netrwPlugin = 1
+
+local function open_directory(dir) Snacks.picker.files { cwd = dir } end
+
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = group,
+  desc = 'Open directories with open_directory',
+  callback = function(ev)
+    local dir = vim.api.nvim_buf_get_name(ev.buf)
+    -- BufEnter can fire more than once for the same directory buffer; open it only the first time
+    if vim.b[ev.buf].directory_opened or dir == '' or vim.fn.isdirectory(dir) == 0 then return end
+    vim.b[ev.buf].directory_opened = true
+    -- The empty directory buffer goes away once a picked file replaces it
+    vim.bo[ev.buf].bufhidden = 'wipe'
+    vim.schedule(function() open_directory(vim.fs.normalize(dir)) end)
+  end,
+})
