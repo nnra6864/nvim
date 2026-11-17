@@ -4,7 +4,7 @@
 local M = {}
 
 -- Pick from the terminal palette (black, red, green, yellow, blue, magenta, cyan, white
--- and their br_ variants like br_blue), any base16 key ('base05') or a hex code.
+-- and their br_ variants like br_blue) or a hex code.
 -- Re-applied on every theme change.
 M.colors = {
   -- Text color; nil picks black or white per segment, whichever reads better on it

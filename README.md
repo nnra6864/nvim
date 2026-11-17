@@ -7,7 +7,7 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 
 - **Languages**: LSP, treesitter, formatting and debugging for C/C++, C#, Zig, Dart/Flutter, Python, Lua, Bash, fish, Markdown, Typst and YAML.<br>
   Servers that aren't installed are skipped.
-- **Theme**: base16, live-reloaded from [Ricer](lua/config/colors.lua), with an oh-my-posh style statusline.
+- **Theme**: highlight groups written by [kosm](lua/config/colors.lua) and live-reloaded, with an oh-my-posh style statusline.
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
   Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
   Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer. Files outside vaults never autosave.
@@ -68,8 +68,8 @@ Also:
 - fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics.<br>
   It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
 - Flutter: the SDK from fvm.
-- Theme: Ricer writes it to `lua/theme.lua`, which isn't in the repo.<br>
-  On a fresh clone, apply a theme in Ricer (or copy `lua/theme.lua` over); until then it's stock base16, without transparency.
+- Theme: kosm's Neovim app writes it to `lua/kosm.lua`, which isn't in the repo.<br>
+  On a fresh clone, apply a kosmos with kosm (or copy `lua/kosm.lua` over); until then it's Neovim's default colorscheme.
 - A [Nerd Font](https://www.nerdfonts.com).<br>
   Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
 - Completion docs open with `Ctrl+Enter`, which most terminals don't pass through.<br>
@@ -172,7 +172,6 @@ Built-in Neovim keys are marked *(nvim)*.
 - [snacks.nvim](https://github.com/folke/snacks.nvim): picker, notifications, indent guides, images, lazygit, zen, smooth scroll, toggles
 - [which-key.nvim](https://github.com/folke/which-key.nvim): keymap hints
 - [flash.nvim](https://github.com/folke/flash.nvim): jump motions
-- [nvim-base16](https://github.com/RRethy/nvim-base16): colors
 - [guess-indent.nvim](https://github.com/NMAC427/guess-indent.nvim): indent detection
 - [keep-split-ratio.nvim](https://github.com/adlrwbr/keep-split-ratio.nvim): splits keep their ratio on resize
 - [vim-abolish](https://github.com/tpope/vim-abolish): case-aware substitute and case conversion
