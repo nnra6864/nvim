@@ -29,7 +29,7 @@ local glyphs = vim.g.have_nerd_font
     and { cap_l = '\u{e0b6}', cap_r = '\u{e0b4}', arrow_r = '\u{e0b0}', arrow_l = '\u{e0b2}', notch_l = '\u{e0d7}', notch_r = '\u{e0d6}' }
   or { cap_l = '', cap_r = '', arrow_r = '', arrow_l = '', notch_l = '', notch_r = '' }
 
-local color = function(name) return require('config.colors').get(name) end
+local color = function(name) return require('kosm').color(name) end
 
 -- Scaling all channels by the same factor changes HSV value but keeps hue and saturation
 local function brighten(hex, percent)
@@ -41,12 +41,14 @@ local function brighten(hex, percent)
 end
 
 function M.highlight()
+  -- kosm writes its plugin on its first apply; until then the segments keep mini's colors
+  if not pcall(require, 'kosm') then return end
   -- Separators sit on the statusline's own background, which is NONE when the theme is transparent
   local line_bg = vim.api.nvim_get_hl(0, { name = 'StatusLine', link = false }).bg
   for mode, key in pairs(M.colors.modes) do
     for i = 1, depth do
       local bg = brighten(color(key), M.colors.offset + (i - 1) * M.colors.step)
-      local fg = M.colors.fg and color(M.colors.fg) or require('config.colors').on(bg)
+      local fg = M.colors.fg and color(M.colors.fg) or require('kosm').on(bg)
       vim.api.nvim_set_hl(0, ('Stl%s%d'):format(mode, i), { fg = fg, bg = bg, bold = i == 1 })
       vim.api.nvim_set_hl(0, ('Stl%s%dSep'):format(mode, i), { fg = bg, bg = line_bg })
     end

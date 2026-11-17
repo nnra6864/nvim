@@ -1,2 +1,4 @@
 # Written by kosm
-lua/kosm.lua
+lua/kosm/
+plugin/kosm.lua
+colors/kosm.lua

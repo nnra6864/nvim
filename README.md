@@ -7,7 +7,7 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 
 - **Languages**: LSP, treesitter, formatting and debugging for C/C++, C#, Zig, Dart/Flutter, Python, Lua, Bash, fish, Markdown, Typst and YAML.<br>
   Servers that aren't installed are skipped.
-- **Theme**: highlight groups written by [kosm](lua/config/colors.lua) and live-reloaded, with an oh-my-posh style statusline.
+- **Theme**: colors from kosm, applied and live-reloaded by the plugin kosm writes (`lua/kosm/`), with an oh-my-posh style statusline.
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
   Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
   Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer. Files outside vaults never autosave.
@@ -68,8 +68,8 @@ Also:
 - fish (optional, nothing else needs it): [fish-lsp](https://github.com/ndonfris/fish-lsp) adds completion, hover docs and diagnostics.<br>
   It's a Node.js tool that isn't in the official repos; highlighting and formatting work without it.
 - Flutter: the SDK from fvm.
-- Theme: kosm's Neovim app writes it to `lua/kosm.lua`, which isn't in the repo.<br>
-  On a fresh clone, apply a kosmos with kosm (or copy `lua/kosm.lua` over); until then it's Neovim's default colorscheme.
+- Theme: kosm's Neovim app writes its colors and plugin (`lua/kosm/`, `plugin/kosm.lua`, `colors/kosm.lua`), which aren't in the repo.<br>
+  On a fresh clone, apply a kosmos with kosm; until then it's Neovim's default colorscheme.
 - A [Nerd Font](https://www.nerdfonts.com).<br>
   Without one, set `vim.g.have_nerd_font = false` in `lua/config/options.lua`.
 - Completion docs open with `Ctrl+Enter`, which most terminals don't pass through.<br>

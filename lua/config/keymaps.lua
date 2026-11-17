@@ -92,7 +92,7 @@ map('n', '<leader>sh', pick 'help', { desc = 'Help' })
 map('n', '<leader>sk', pick 'keymaps', { desc = 'Keymaps' })
 map('n', '<leader>sc', pick 'commands', { desc = 'Commands' })
 map('n', '<leader>sd', pick 'diagnostics', { desc = 'Diagnostics' })
--- Previews live; Esc goes back to kosm's theme. A picked theme lasts until kosm writes kosm.lua again
+-- Previews live; Esc goes back to kosm's theme. A picked theme lasts until kosm writes its colors again
 map('n', '<leader>st', pick 'colorschemes', { desc = 'Themes' })
 map('n', '<leader>sr', pick 'resume', { desc = 'Resume last search' })
 map('n', '<leader>sn', pick('files', { cwd = vim.fn.stdpath 'config' }), { desc = 'Neovim config' })
