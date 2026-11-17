@@ -1,13 +1,14 @@
 -- mini.statusline layout styled like the oh-my-posh prompt: rounded caps at both ends,
 -- arrows and notches chaining the segments, and each segment a step brighter than the
--- previous one (same as Ricer's prompt_bg_hsv_delta).
+-- previous one.
 local M = {}
 
 -- Pick from the terminal palette (black, red, green, yellow, blue, magenta, cyan, white
 -- and their br_ variants like br_blue), any base16 key ('base05') or a hex code.
 -- Re-applied on every theme change.
 M.colors = {
-  fg = 'base05',
+  -- Text color; nil picks black or white per segment, whichever reads better on it
+  fg = nil,
   modes = {
     Normal = 'blue',
     Insert = 'cyan',
@@ -42,10 +43,10 @@ end
 function M.highlight()
   -- Separators sit on the statusline's own background, which is NONE when the theme is transparent
   local line_bg = vim.api.nvim_get_hl(0, { name = 'StatusLine', link = false }).bg
-  local fg = color(M.colors.fg)
   for mode, key in pairs(M.colors.modes) do
     for i = 1, depth do
       local bg = brighten(color(key), M.colors.offset + (i - 1) * M.colors.step)
+      local fg = M.colors.fg and color(M.colors.fg) or require('config.colors').on(bg)
       vim.api.nvim_set_hl(0, ('Stl%s%d'):format(mode, i), { fg = fg, bg = bg, bold = i == 1 })
       vim.api.nvim_set_hl(0, ('Stl%s%dSep'):format(mode, i), { fg = bg, bg = line_bg })
     end
