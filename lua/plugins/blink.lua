@@ -60,6 +60,22 @@ return {
         markdown = { inherit_defaults = true, 'unresolved_links' },
       },
       providers = {
+        -- Not inside strings or comments: there snippet prefixes fuzzy-match ordinary words
+        -- (a URL in a docker-compose value pulls in multi-line service templates)
+        snippets = {
+          enabled = function()
+            local cursor = vim.api.nvim_win_get_cursor(0)
+            local ok, node = pcall(vim.treesitter.get_node, { pos = { cursor[1] - 1, math.max(cursor[2] - 1, 0) } })
+            while ok and node do
+              local type = node:type()
+              if type:find 'string' or type:find 'comment' or type:find 'quote_scalar' or type:find 'block_scalar' then
+                return false
+              end
+              node = node:parent()
+            end
+            return true
+          end,
+        },
         lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
         -- [[links]] to notes that don't exist yet; ranked below existing notes
         unresolved_links = { name = 'Unresolved', module = 'config.unresolved_links', score_offset = -2 },
