@@ -10,3 +10,5 @@ require 'config.lazy'
 -- After plugins: snacks toggles are created as the keymaps are defined
 require 'config.keymaps'
 require 'config.lsp'
+-- The Bible in the vault: :Bible, opening references, cross-reference display (config/bible)
+require('config.bible').setup()

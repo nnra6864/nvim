@@ -11,6 +11,7 @@ return {
       { '<leader>d', group = 'Debug' },
       { '<leader>e', group = 'Explore' },
       { '<leader>o', group = 'Notes' },
+      { '<leader>b', group = 'Bible' },
       { '<leader>g', group = 'Git' },
       { '<leader>i', group = 'Indent' },
       { 'gs', group = 'Surround' },

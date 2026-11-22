@@ -134,6 +134,64 @@ map('n', '<leader>og', obsidian 'tags', { desc = 'Tags' })
 map('n', '<leader>op', obsidian 'paste_img', { desc = 'Paste image' })
 map('n', '<leader>oT', obsidian 'template', { desc = 'Insert template' })
 
+-- Bible (config/bible). <leader>bg: type a book, then a space switches to its verses in the same
+-- prompt ("exo 3:14", "exo i am who"); <Tab> completes the book. <M-l>/<M-h> change the language
+-- inside the pickers. References in notes ("Jn 3:16", "Јн 3, 16", "1 Kor 13:4-7 (el)"):
+-- <CR>/gd follow, K shows every translation and the cross-references, gy yanks a quote, grr notes
+-- citing it. In the Bible itself K/gy/grr work on the verse at the cursor (gy in visual: the selection).
+local bible = function(fn, ...)
+  local args = { ... }
+  return function() require('config.bible')[fn](unpack(args)) end
+end
+local bible_picker = function(fn)
+  return function() require('config.bible.picker')[fn]() end
+end
+map('n', '<leader>bb', bible_picker 'books', { desc = 'Books' })
+map('n', '<leader>bg', bible_picker 'go', { desc = 'Go to verse' })
+map('n', '<leader>bs', bible_picker 'search', { desc = 'Search text' })
+map('n', '<leader>bl', bible 'select_lang', { desc = 'Language' })
+-- The follower split follows the window you read in; it waits while you're in other files
+map('n', '<leader>bp', function() require('config.bible.follow').toggle() end, { desc = 'Parallel translation split' })
+map('n', '<leader>bP', function() require('config.bible.follow').select_lang() end, { desc = 'Parallel translation language' })
+map('n', '<leader>bX', bible 'xrefs', { desc = 'Cross-references of this verse' })
+map('n', '<leader>bR', bible 'select_xref_sources', { desc = 'Cross-reference sets shown' })
+map('n', '<leader>bn', function() require('config.bible').normalize() end, { desc = 'Normalize references in note' })
+map('x', '<leader>bn', function()
+  local s, e = vim.fn.line 'v', vim.fn.line '.'
+  vim.api.nvim_feedkeys(vim.keycode '<Esc>', 'n', false)
+  require('config.bible').normalize(math.min(s, e), math.max(s, e))
+end, { desc = 'Normalize references in selection' })
+-- Cross-references and footnotes are hidden like in a printed Bible; this shows them under the verses
+toggle('<leader>bx', 'Bible cross-references', function() return require('config.bible').show_extras() end,
+  function(on) require('config.bible').set_show_extras(on) end)
+-- In Markdown: wraps obsidian.nvim's <CR> and the LSP's gd/grr/K, which still work off references.
+-- Re-applied after obsidian.nvim and LSPs set their own buffer maps.
+local function bible_keys(buf)
+  if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].filetype ~= 'markdown' then return end
+  local b = require 'config.bible'
+  if not b.data.root() then return end
+  if not b.data.locate(vim.api.nvim_buf_get_name(buf)) then b.highlight_refs(buf) end
+  b.wrap_key(buf, 'n', '<CR>', function() return b.follow() end, 'Follow reference')
+  b.wrap_key(buf, 'n', 'gd', function() return b.follow() end, 'Follow reference')
+  b.wrap_key(buf, 'n', 'K', function() return b.hover() end, 'Verse in every translation')
+  b.wrap_key(buf, 'n', 'grr', function() return b.backlinks() end, 'Notes citing this')
+  b.wrap_key(buf, 'n', 'gy', function()
+    if not (b.cursor_ref() or b.cursor_verse()) then return false end
+    b.yank()
+  end, 'Yank quote')
+  b.wrap_key(buf, 'x', 'gy', function()
+    if not b.cursor_verse() then return false end
+    b.yank(true)
+  end, 'Yank quote of verses')
+  b.wrap_key(buf, 'n', '<C-w><CR>', function() return b.follow 'vsplit' end, 'Follow reference in split')
+end
+vim.api.nvim_create_autocmd({ 'FileType', 'BufEnter', 'LspAttach' }, {
+  group = vim.api.nvim_create_augroup('bible-keymaps', { clear = true }),
+  callback = function(args)
+    vim.schedule(function() bible_keys(args.buf) end)
+  end,
+})
+
 -- Debugging. F-keys while stepping; the view opens with the session
 local dap = function(fn, ...)
   local args = { ... }

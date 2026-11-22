@@ -57,7 +57,7 @@ return {
       default = { 'lsp', 'path', 'snippets' },
       per_filetype = {
         lua = { inherit_defaults = true, 'lazydev' },
-        markdown = { inherit_defaults = true, 'unresolved_links' },
+        markdown = { inherit_defaults = true, 'unresolved_links', 'bible' },
       },
       providers = {
         -- Not inside strings or comments: there snippet prefixes fuzzy-match ordinary words
@@ -79,6 +79,8 @@ return {
         lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
         -- [[links]] to notes that don't exist yet; ranked below existing notes
         unresolved_links = { name = 'Unresolved', module = 'config.unresolved_links', score_offset = -2 },
+        -- Bible book names, and verse numbers (with their text) after "Jn 3:"
+        bible = { name = 'Bible', module = 'config.bible.blink', score_offset = -3 },
       },
     },
 
