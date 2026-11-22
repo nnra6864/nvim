@@ -11,6 +11,8 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
   Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
   Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer. Files outside vaults never autosave.
+- **Bible**: an Orthodox Bible in the vault, in five languages with one numbering, so a reference is the same verse in all of them.<br>
+  References and verse links in notes, every translation on hover, a parallel translation split, cross-references. See [Bible](#bible).
 - **Git**: lazygit, VSCode-style diffs between any two commits, file and line history, blame, hunks in the gutter.
 - **Files**: yazi instead of netrw.<br>
   Renaming or moving a file updates imports and note links.
@@ -146,6 +148,15 @@ Built-in Neovim keys are marked *(nvim)*.
 | `op` `oN` `oT` | Paste image / new from template / insert template |
 | `Enter` | In notes: follow link or toggle checkbox |
 
+| Bible `<leader>b` | |
+|---|---|
+| `bg` `bb` `bs` | Go to verse (`exo 3:14`, `exo i am who`) / books / search text |
+| `bl`, `bp` `bP` | Reading language, parallel translation split / its language |
+| `bx`, `bX` `bR` | Show cross-references under verses, of this verse / sets shown |
+| `bn` | Normalize references in note (or selection) |
+| `K` `gd` `gy` `grr` | On a reference or verse: every translation / open / yank quote / notes citing it (no leader) |
+| `Alt+l` `Alt+h` | In Bible pickers: next / previous language |
+
 | Debug `<leader>d` | |
 |---|---|
 | `F5` `F10` `F11` `F12` | Start or continue / step over / into / out |
@@ -160,6 +171,36 @@ Built-in Neovim keys are marked *(nvim)*.
 | `tw` `ts` `ti` `tS` | Wrap / spelling / indent guides / smooth scroll |
 | `tm` `tp` | Markdown rendering / Typst preview |
 | `<leader>i2` `i4` `i8` `it` | Indent width, tabs ↔ spaces (`ig` guess, `ir` retab) |
+
+## Bible
+
+The Bible lives in the vault as Markdown, one file per book and language (sr-Cyrl, sr-Latn, ru, el, en), built by a separate importer.
+Every language uses the printed Russian Synodal numbering, so `Jn 3:16` is the same verse in all of them.
+The plugin finds the Bible folder in the current vault by its `books.json`; `vim.g.bible_root` overrides that.
+
+**Citing in notes**, either way works in Neovim:
+
+```markdown
+Jn 3:16, Јн 3, 16, Ин. 3:16-18, 1 Cor 13:4-7; 14:1, Ps 50     plain text, any language's names
+Jn 1:1 (el)                                                   pinned to a language
+[[56 John#^3-16|Jn 3:16]]                                     a link to the verse
+[[56 John#^3-16|Jn 3:16-18]]  [[56 John#3|Jn 3]]              a range (opens at 3:16), a chapter
+```
+
+- Links also work in the Obsidian app and show in its graph. Each verse line ends in a block id (`^3-16`), hidden in both.
+  Plain-text references work only in Neovim.
+- In `[[`, type `Jn 3:` and pick a verse to insert its link, or type a range (`[[Jn 3:16-18`) or chapter (`[[Jn 3`).
+  Outside links, `Jn 3:` completes verse numbers. Books shared by name across languages (`38 Amos`) are linked by their path.
+- On a reference: `K` shows the verse in every translation with its cross-references, `gd`/`Enter` opens it in the
+  reading language (`Ctrl+w Enter` in a split), `gy` yanks it as a quote, `grr` lists the notes citing it.
+  In the Bible itself they work on the verse under the cursor.
+- `Jn 3:16a` (half a verse) opens the whole verse. Lettered verses that exist in the text (`Est 1:1a`) open exactly.
+
+**Reading**: cross-references and footnotes are hidden like in a printed Bible. `K` shows them for one verse, `<leader>bx` under every verse.
+The parallel split (`<leader>bp`) follows the verse you're reading in a second language.
+Cross-references come from the Serbian and English editions, and optionally OpenBible.info (`<leader>bR`).
+
+`:Bible jn 3:16` opens a reference; `:Bible lang|follow|search|xrefs|normalize` do what the keys do.
 
 ## Plugins
 
