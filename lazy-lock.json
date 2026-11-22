@@ -17,7 +17,7 @@
   "nvim-lspconfig": { "branch": "master", "commit": "e1c6a5a45d95ad22cf55c874db2ff8ab969556f0" },
   "nvim-treesitter": { "branch": "main", "commit": "b706d642dd20d0922e7e92365dc73617f0fdb4ea" },
   "nvim-treesitter-context": { "branch": "master", "commit": "8decd73460d26ef0a0befb745d022dd1fc2c38b8" },
-  "obsidian.nvim": { "branch": "jxl", "commit": "6e373b2d224fd7c3b3fd3990e9e4f980e6e0ce97" },
+  "obsidian.nvim": { "branch": "perf/completion-cache", "commit": "6589264d26d99949086d2e37942dc677f37e8f2e" },
   "plenary.nvim": { "branch": "master", "commit": "74b06c6c75e4eeb3108ec01852001636d85a932b" },
   "render-markdown.nvim": { "branch": "main", "commit": "a67f826164c38c836fc6060f32b275c4c43317a7" },
   "snacks.nvim": { "branch": "tuios", "commit": "d16fc695d7a89568d5ff4e4a4ecf95382211f827" },
