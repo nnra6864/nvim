@@ -61,10 +61,18 @@ return {
       },
       providers = {
         -- Not inside strings or comments: there snippet prefixes fuzzy-match ordinary words
-        -- (a URL in a docker-compose value pulls in multi-line service templates)
+        -- (a URL in a docker-compose value pulls in multi-line service templates).
+        -- Nor in a note's YAML frontmatter, where Markdown snippets crowd out tags.
         snippets = {
           enabled = function()
             local cursor = vim.api.nvim_win_get_cursor(0)
+            if vim.bo.filetype == 'markdown' then
+              local ok, parser = pcall(vim.treesitter.get_parser, 0)
+              local row, col = cursor[1] - 1, cursor[2]
+              if ok and parser and parser:language_for_range({ row, col, row, col }):lang() == 'yaml' then
+                return false
+              end
+            end
             local ok, node = pcall(vim.treesitter.get_node, { pos = { cursor[1] - 1, math.max(cursor[2] - 1, 0) } })
             while ok and node do
               local type = node:type()
