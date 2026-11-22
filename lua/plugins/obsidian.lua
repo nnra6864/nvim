@@ -33,5 +33,9 @@ return {
     -- <CR> toggles a checkbox like the Obsidian app, instead of cycling through ~ ! > first
     checkbox = { order = { ' ', 'x' } },
     link = { auto_update = true },
+    -- The Bible (config/bible) has its own references and pickers. As notes, its 389 books
+    -- made [[ completion load every one of them on terms like "Bib" (~2 s), and drowned
+    -- note search and quick switch
+    file = { ignore_filters = { '**/Religion/Bible/**' } },
   },
 }
