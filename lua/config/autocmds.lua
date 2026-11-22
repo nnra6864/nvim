@@ -53,6 +53,21 @@ vim.api.nvim_create_autocmd({ 'BufFilePost', 'BufWipeout' }, {
   end,
 })
 
+-- `nvim` with no files, inside a vault, opens the note edited last, like the Obsidian app
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = group,
+  desc = 'Open the last edited note when starting in a vault',
+  -- So the note's own autocmds (filetype, obsidian.nvim) run
+  nested = true,
+  callback = function()
+    if vim.fn.argc() > 0 or vim.api.nvim_buf_get_name(0) ~= '' or vim.bo.modified or vim.bo.buftype ~= '' then return end
+    local notes = require 'config.notes'
+    local vault = notes.root(vim.fn.getcwd())
+    local note = vault and notes.last_edited(vault)
+    if note then vim.cmd.edit(vim.fn.fnameescape(note)) end
+  end,
+})
+
 -- Opening a directory (`nvim .`, `:e dir/`) runs open_directory instead of showing a listing.
 -- Change it to pick something else, e.g. `require('yazi').yazi(nil, dir)` for yazi,
 -- or `vim.cmd.lcd(dir)` first to also make it the working directory

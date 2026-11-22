@@ -265,7 +265,28 @@ function M.new(todo)
 
   vim.fn.writefile(lines, path)
   vim.cmd.edit(vim.fn.fnameescape(path))
-  vim.api.nvim_win_set_cursor(0, { #lines, 0 })
+  -- Right below the properties, where new tasks go above the carried-over ones
+  vim.api.nvim_win_set_cursor(0, { header + 1, 0 })
+end
+
+--- The most recently modified note in `vault`. Folders with a books.json (the Bible) are
+--- skipped, since regenerating it touches every book.
+function M.last_edited(vault)
+  local best, best_time
+  local function scan(dir)
+    if vim.uv.fs_stat(dir .. '/books.json') then return end
+    for name, type in vim.fs.dir(dir) do
+      local path = dir .. '/' .. name
+      if type == 'directory' and not name:match '^%.' then
+        scan(path)
+      elseif type == 'file' and name:match '%.md$' then
+        local stat = vim.uv.fs_stat(path)
+        if stat and (not best_time or stat.mtime.sec > best_time) then best, best_time = path, stat.mtime.sec end
+      end
+    end
+  end
+  scan(vault)
+  return best
 end
 
 return M
