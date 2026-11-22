@@ -11,14 +11,31 @@ local M = {}
 
 local fold_map = {
   -- Greek accents and final sigma (monotonic; the aliases are monotonic too)
-  ['ά'] = 'α', ['έ'] = 'ε', ['ή'] = 'η', ['ί'] = 'ι', ['ό'] = 'ο', ['ύ'] = 'υ', ['ώ'] = 'ω',
-  ['ϊ'] = 'ι', ['ΐ'] = 'ι', ['ϋ'] = 'υ', ['ΰ'] = 'υ', ['ς'] = 'σ',
+  ['ά'] = 'α',
+  ['έ'] = 'ε',
+  ['ή'] = 'η',
+  ['ί'] = 'ι',
+  ['ό'] = 'ο',
+  ['ύ'] = 'υ',
+  ['ώ'] = 'ω',
+  ['ϊ'] = 'ι',
+  ['ΐ'] = 'ι',
+  ['ϋ'] = 'υ',
+  ['ΰ'] = 'υ',
+  ['ς'] = 'σ',
   -- Serbian Latin, so names match typed without diacritics
-  ['š'] = 's', ['č'] = 'c', ['ć'] = 'c', ['ž'] = 'z', ['đ'] = 'dj',
+  ['š'] = 's',
+  ['č'] = 'c',
+  ['ć'] = 'c',
+  ['ž'] = 'z',
+  ['đ'] = 'dj',
   -- Russian ё
   ['ё'] = 'е',
   -- Greek numeral sign and apostrophes
-  ['΄'] = "'", ['ʹ'] = "'", ['’'] = "'", ['ʼ'] = "'",
+  ['΄'] = "'",
+  ['ʹ'] = "'",
+  ['’'] = "'",
+  ['ʼ'] = "'",
 }
 local numerals = { ['α'] = '1', ['β'] = '2', ['γ'] = '3', ['δ'] = '4', i = '1', ii = '2', iii = '3', iv = '4' }
 
@@ -35,7 +52,7 @@ function M.fold(s)
     first = first:gsub("'$", '')
     if numerals[first] then s = numerals[first] .. ' ' .. rest end
   end
-  local body, last = s:match "^(.+) (%S+)$"
+  local body, last = s:match '^(.+) (%S+)$'
   if body then
     local l = last:gsub("'$", '')
     if numerals[l] and l:match '^[αβγδ]$' then s = numerals[l] .. ' ' .. body end
@@ -95,13 +112,17 @@ function M.books_with_prefix(prefix)
   if exact then
     local ids, n = {}, 0
     for _, c in ipairs(exact) do
-      if not ids[c.book] then ids[c.book], n = true, n + 1 end
+      if not ids[c.book] then
+        ids[c.book], n = true, n + 1
+      end
     end
     if n == 1 then return ids, 1 end
   end
   local ids, n = {}, 0
   for _, e in ipairs(index().list) do
-    if e.key:sub(1, #key) == key and not ids[e.book] then ids[e.book], n = true, n + 1 end
+    if e.key:sub(1, #key) == key and not ids[e.book] then
+      ids[e.book], n = true, n + 1
+    end
   end
   return ids, n
 end
@@ -185,8 +206,12 @@ end
 --- A range dash at byte `pos` ("-", "–", "—", spaces around): byte after it, or nil
 local function dash(line, pos)
   local _, e = line:find('^%s*%-%s*', pos)
-  if not e then _, e = line:find('^%s*–%s*', pos) end
-  if not e then _, e = line:find('^%s*—%s*', pos) end
+  if not e then
+    _, e = line:find('^%s*–%s*', pos)
+  end
+  if not e then
+    _, e = line:find('^%s*—%s*', pos)
+  end
   return e and e + 1
 end
 
@@ -232,8 +257,47 @@ local function book_before(line, pos, lang)
   end
 end
 
+--- Links to a verse or chapter of a book file: [[56 John#^3-16]], [[56 John#^3-16|Jn 3:16-18]]
+--- (the alias can widen it to a range), [[56 John#3|Jn 3]]. Marked `link`.
+local function wikilinks(line)
+  local out = {}
+  if not line:find('[[', 1, true) then return out end
+  for s, inner, e in line:gmatch '()%[%[([^%[%]]-)%]%]()' do
+    local target, anchor, alias = inner:match '^([^#|]+)#([^|]*)|?(.*)$'
+    local book = target and data.link_book(vim.trim(target))
+    if book then
+      local r
+      local c, v, sub = anchor:match '^%^(%d+)%-(%d+)(%l?)$'
+      if c then
+        r = { book = book, ch = tonumber(c), v = tonumber(v), sub = sub ~= '' and sub or nil }
+      elseif anchor:match '^%d+$' then
+        r = { book = book, ch = tonumber(anchor) }
+      end
+      if r then
+        local a = alias ~= '' and M.parse(alias, { loose = true })[1]
+        if a and a.book == r.book and a.ch == r.ch and a.v == r.v then
+          r.v2, r.ch2 = a.v2, a.ch2
+        end
+        r.col, r.end_col, r.link = s - 1, e - 1, true
+        table.insert(out, r)
+      end
+    end
+  end
+  return out
+end
+
+--- Link to `r` in the book file of `lang`: [[56 John#^3-16|Jn 3:16-18]] (to its first verse, the
+--- alias saying the rest), [[56 John#3|Jn 3]]. Obsidian jumps to the verse; the plugin reads it as `r`.
+function M.wikilink(r, lang)
+  lang = data.lang_with(r.book, lang or data.lang())
+  local target = lang and data.link_target(r.book, lang)
+  if not target then return end
+  local anchor = r.v and ('^' .. data.block_id(r.ch, r.v, r.sub)) or tostring(r.ch)
+  return ('[[%s#%s|%s]]'):format(target, anchor, M.format(r, lang))
+end
+
 --- All references in a line: { {book, ch, v, v2, ch2, lang, col, end_col}, ... } (0-based, end exclusive).
---- `opts.lang` resolves names that differ between languages; `opts.loose` accepts chapter-only
+--- Links to Bible files count too ([[56 John#^3-16|…]]). `opts.lang` resolves names that differ between languages; `opts.loose` accepts chapter-only
 --- references with lowercase names ("ps 50"), which in prose would also match "am 3".
 function M.parse(line, opts)
   opts = opts or {}
@@ -260,14 +324,16 @@ function M.parse(line, opts)
         rest = ve + 1
         -- Range: "-18", "–18", "-4:2"
         local after, v2, ch2 = range(line, rest, true)
-        if after then r.v2, r.ch2, rest = v2, ch2, after end
+        if after then
+          r.v2, r.ch2, rest = v2, ch2, after
+        end
       else
         -- Chapter only: needs a capitalised name, so prose doesn't light up
-        if not opts.loose and not is_upper(vim.fn.strcharpart(name, 0, 1)) and not name:match '^%d' then
-          book = nil
-        end
+        if not opts.loose and not is_upper(vim.fn.strcharpart(name, 0, 1)) and not name:match '^%d' then book = nil end
         local after, ch2 = range(line, rest)
-        if book and after then r.ch2, rest = ch2, after end
+        if book and after then
+          r.ch2, rest = ch2, after
+        end
       end
       if book then
         local b = data.book(book)
@@ -288,7 +354,9 @@ function M.parse(line, opts)
               rest = ce + 1
               n.col = line:find('%d', cs) - 1
               local after, v2 = range(line, rest)
-              if after then n.v2, rest = v2, after end
+              if after then
+                n.v2, rest = v2, after
+              end
               n.end_col = rest - 1
               table.insert(out, n)
             else
@@ -299,7 +367,9 @@ function M.parse(line, opts)
                 n.col = line:find('%d', ls2) - 1
                 rest = le2 + 1
                 local after, v2 = range(line, rest)
-                if after then n.v2, rest = v2, after end
+                if after then
+                  n.v2, rest = v2, after
+                end
                 n.end_col = rest - 1
                 table.insert(out, n)
               else
@@ -312,6 +382,18 @@ function M.parse(line, opts)
       pos = math.max(rest, e + 1)
     end
   end
+  -- Links to Bible files: one reference each, instead of what's inside them
+  local links = wikilinks(line)
+  if #links > 0 then
+    out = vim.tbl_filter(function(r)
+      for _, l in ipairs(links) do
+        if r.col < l.end_col and r.end_col > l.col then return false end
+      end
+      return true
+    end, out)
+    vim.list_extend(out, links)
+    table.sort(out, function(a, b) return a.col < b.col end)
+  end
   return out
 end
 
@@ -323,8 +405,6 @@ function M.at(line, col, opts)
 end
 
 --- A reference typed on its own (":Bible jn 3:16", the picker): lowercase names allowed
-function M.parse_one(text, lang)
-  return M.parse(text, { loose = true, lang = lang })[1]
-end
+function M.parse_one(text, lang) return M.parse(text, { loose = true, lang = lang })[1] end
 
 return M

@@ -10,6 +10,7 @@ M.data, M.ref = data, ref
 
 local ns = vim.api.nvim_create_namespace 'bible'
 local ns_extras = vim.api.nvim_create_namespace 'bible-extras'
+local ns_ids = vim.api.nvim_create_namespace 'bible-block-ids'
 
 -- Windows ----------------------------------------------------------------------------------
 
@@ -100,9 +101,7 @@ local function lines_of(path, r)
   return first, last
 end
 
-local function flash(buf, first, last)
-  vim.hl.range(buf, ns, 'Search', { first - 1, 0 }, { last - 1, -1 }, { timeout = 600 })
-end
+local function flash(buf, first, last) vim.hl.range(buf, ns, 'Search', { first - 1, 0 }, { last - 1, -1 }, { timeout = 600 }) end
 
 --- Opens reference `r` (in r.lang, opts.lang, else the reading language).
 --- opts: lang, win, split ('vsplit'|'split'|'tab'), flash (default true)
@@ -111,9 +110,7 @@ function M.open(r, opts)
   local want = r.lang or opts.lang or data.lang()
   local lang = data.lang_with(r.book, want)
   if not lang then return vim.notify('Unknown book ' .. tostring(r.book), vim.log.levels.WARN) end
-  if lang ~= want then
-    vim.notify(('%s isn\'t in %s; showing %s'):format(data.names(r.book, 'en')[1], data.lang_name(want), data.lang_name(lang)))
-  end
+  if lang ~= want then vim.notify(("%s isn't in %s; showing %s"):format(data.names(r.book, 'en')[1], data.lang_name(want), data.lang_name(lang))) end
   local path = data.file(r.book, lang)
   if not path then return end
   local cur = vim.api.nvim_get_current_win()
@@ -184,7 +181,9 @@ function M.yank(visual)
     local cv = M.cursor_verse()
     if not cv then return end
     local s, e = vim.fn.line 'v', vim.fn.line '.'
-    if s > e then s, e = e, s end
+    if s > e then
+      s, e = e, s
+    end
     local p = data.parse(vim.api.nvim_buf_get_name(0))
     local first, last
     for _, v in ipairs(p.list) do
@@ -194,7 +193,14 @@ function M.yank(visual)
       end
     end
     if not first then return end
-    r = { book = cv.book, ch = first.ch, v = first.v, ch2 = last.ch ~= first.ch and last.ch or nil, v2 = (last.to or last.v) ~= first.v and (last.to or last.v) or nil, lang = cv.lang }
+    r = {
+      book = cv.book,
+      ch = first.ch,
+      v = first.v,
+      ch2 = last.ch ~= first.ch and last.ch or nil,
+      v2 = (last.to or last.v) ~= first.v and (last.to or last.v) or nil,
+      lang = cv.lang,
+    }
     vim.api.nvim_feedkeys(vim.keycode '<Esc>', 'n', false)
   else
     r = M.cursor_ref()
@@ -351,10 +357,14 @@ function M.xrefs()
     local text = verses[1] and data.plain(verses[1].text) or ''
     local tl = ref.format(t, data.lang())
     table.insert(items, {
-      text = tl .. ' ' .. text, label = tl, ref = t, preview_text = text,
+      text = tl .. ' ' .. text,
+      label = tl,
+      ref = t,
+      preview_text = text,
       -- Which edition printed the reference (the reference itself is shown in the reading language)
       source = t.source == 'openbible' and 'OpenBible' or ((names[t.source] or t.source):match '^%S+' .. ' ed.'),
-      file = file, pos = file and { line_of(file, t), 0 } or nil,
+      file = file,
+      pos = file and { line_of(file, t), 0 } or nil,
     })
   end
   Snacks.picker {
@@ -488,7 +498,7 @@ function M.normalize(first, last, lang)
     local refs = ref.parse(line)
     for k = #refs, 1, -1 do
       local r = refs[k]
-      if not r.cont then
+      if not r.cont and not r.link then
         local text = ref.format(r, r.lang or lang) .. (r.lang and (' (' .. r.lang .. ')') or '')
         if line:sub(r.col + 1, r.end_col) ~= text then
           line = line:sub(1, r.col) .. text .. line:sub(r.end_col + 1)
@@ -553,6 +563,7 @@ vim.api.nvim_set_hl(0, 'BibleRef', { default = true, link = '@markup.link' })
 vim.api.nvim_set_hl(0, 'BibleXref', { default = true, link = 'Comment' })
 vim.api.nvim_set_hl(0, 'BibleNote', { default = true, link = 'Comment' })
 vim.api.nvim_set_hl(0, 'BibleExtraSign', { default = true, link = 'NonText' })
+vim.api.nvim_set_hl(0, 'BibleBlockId', { default = true, link = 'NonText' })
 
 local highlight_bufs = {}
 function M.highlight_refs(buf) highlight_bufs[buf] = true end
@@ -568,6 +579,16 @@ vim.api.nvim_set_decoration_provider(ns, {
   end,
 })
 
+--- Hides the block ids ending verse lines (" ^3-16", for Obsidian links), as Obsidian does
+--- (dimmed on the cursor line, where Neovim shows concealed text)
+function M.conceal_block_ids(buf)
+  vim.api.nvim_buf_clear_namespace(buf, ns_ids, 0, -1)
+  for i, line in ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false)) do
+    local s = line:find(data.BLOCK_ID)
+    if s then vim.api.nvim_buf_set_extmark(buf, ns_ids, i - 1, s - 1, { end_col = #line, conceal = '', hl_group = 'BibleBlockId' }) end
+  end
+end
+
 -- Setup ------------------------------------------------------------------------------------
 
 function M.setup()
@@ -582,6 +603,7 @@ function M.setup()
       if not vim.b[ev.buf].bible_rendered then
         vim.b[ev.buf].bible_rendered = true
         M.render_extras(ev.buf)
+        M.conceal_block_ids(ev.buf)
       end
     end,
   })

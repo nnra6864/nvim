@@ -39,9 +39,14 @@ local function book_items(only)
       table.insert(items, {
         -- snacks only ignores case for ASCII: match on lowercased names, without accents
         text = table.concat(folded, ' '),
-        book = b.id, name = names[1], abbr = names[2], missing = file_lang ~= lang and file_lang or nil,
+        book = b.id,
+        name = names[1],
+        abbr = names[2],
+        missing = file_lang ~= lang and file_lang or nil,
         other = (b.names.en or {})[1] ~= names[1] and (b.names.en or {})[1] or nil,
-        file = file, pos = { 1, 0 }, order = b.order,
+        file = file,
+        pos = { 1, 0 },
+        order = b.order,
       })
     end
   end
@@ -74,7 +79,11 @@ local function verse_items(book, ch, v)
         -- Lowercased for matching (snacks folds only ASCII case); shown as written
         text = vim.fn.tolower(plain),
         display = plain,
-        label = num, file = path, pos = { x.line, 0 }, verse = x, abbr = abbr,
+        label = num,
+        file = path,
+        pos = { x.line, 0 },
+        verse = x,
+        abbr = abbr,
         ref = { book = book, ch = x.ch, v = x.v, sub = x.sub ~= '' and x.sub or nil },
       })
     end
@@ -99,9 +108,7 @@ local function boost(picker, pattern)
   end
   local prefixed = ref.books_with_prefix(pattern)
   for _, item in ipairs(picker.finder.items or {}) do
-    if item.book and not item.verse then
-      item.score_add = exact[item.book] and 2000 or prefixed[item.book] and 1000 or nil
-    end
+    if item.book and not item.verse then item.score_add = exact[item.book] and 2000 or prefixed[item.book] and 1000 or nil end
   end
 end
 
@@ -193,9 +200,7 @@ local function mode(text)
   if not ch then
     ch, after = rest:match '^(%d+)%s*[:%.,]?%s*(.*)$'
   end
-  if ch then
-    return { key = key .. '|' .. ch .. '|' .. (v or ''), pattern = after, book = book, ch = tonumber(ch), v = tonumber(v) }
-  end
+  if ch then return { key = key .. '|' .. ch .. '|' .. (v or ''), pattern = after, book = book, ch = tonumber(ch), v = tonumber(v) } end
   return { key = key, pattern = rest, book = book }
 end
 M._mode = mode
@@ -274,7 +279,7 @@ function M.search(initial)
       end
       local ret = { { pad(item.bible_label, 14), 'SnacksPickerLabel' } }
       local offset = Snacks.picker.highlight.offset(ret)
-      local text = (item.line or ''):gsub('^%d+%l?%-?%d*%. ', '')
+      local text = (item.line or ''):gsub('^%d+%l?%-?%d*%. ', ''):gsub(data.BLOCK_ID, '')
       local cut = #(item.line or '') - #text
       ret[#ret + 1] = { text }
       local positions
@@ -301,10 +306,14 @@ function M.search(initial)
         M.search(s)
       end,
     },
-    win = { input = { keys = {
-      ['<M-l>'] = { 'bible_lang_next', mode = { 'i', 'n' }, desc = 'Next language' },
-      ['<M-h>'] = { 'bible_lang_prev', mode = { 'i', 'n' }, desc = 'Previous language' },
-    } } },
+    win = {
+      input = {
+        keys = {
+          ['<M-l>'] = { 'bible_lang_next', mode = { 'i', 'n' }, desc = 'Next language' },
+          ['<M-h>'] = { 'bible_lang_prev', mode = { 'i', 'n' }, desc = 'Previous language' },
+        },
+      },
+    },
   }
 end
 

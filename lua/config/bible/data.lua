@@ -1,32 +1,61 @@
--- The Bible in the vault (built by ~/Data/Projects/Scraper/bible): where it is, its books and
--- languages, the language you read in (remembered per machine), and the verses of a book file.
+-- The Bible in the vault (built by the Bible importer): where it is, its books and languages,
+-- the language you read in (remembered per machine), and the verses of a book file.
 -- Every translation uses the same (Russian Synodal) numbering, so a verse is the same
 -- book/chapter/verse in every language.
 local M = {}
 
 local state_file = vim.fn.stdpath 'state' .. '/bible.json'
-local BIBLE_DIR = 'Resources/Religion/Bible'
 
 local function exists(path) return path and vim.uv.fs_stat(path) ~= nil end
 
---- The Bible folder: vim.g.bible_root, else the one in the current (or last used) vault,
---- else the one in ~/Documents/Obsidian/nn
-function M.root()
-  if M._root then return M._root end
-  local candidates = { vim.g.bible_root }
-  local ok, notes = pcall(require, 'config.notes')
-  local vault = ok and notes.current() or nil
-  if vault then table.insert(candidates, vault .. '/' .. BIBLE_DIR) end
-  table.insert(candidates, vim.fs.normalize '~/Documents/Obsidian/nn/' .. BIBLE_DIR)
-  for _, c in pairs(candidates) do
-    if exists(c .. '/books.json') then
-      M._root = vim.fs.normalize(vim.uv.fs_realpath(c) or c)
-      return M._root
-    end
-  end
+local read_json
+
+--- A Bible folder: its books.json lists the books and the numbering
+local function is_bible(dir)
+  local meta = exists(dir .. '/books.json') and read_json(dir .. '/books.json')
+  return type(meta) == 'table' and meta.versification ~= nil and type(meta.books) == 'table'
 end
 
-local function read_json(path)
+--- The Bible folder: vim.g.bible_root, else the one in the current (or last used) vault,
+--- wherever it is in there (found once, then remembered per vault)
+function M.root()
+  if M._root then return M._root end
+  if vim.g.bible_root then
+    local dir = vim.fs.normalize(vim.g.bible_root)
+    if is_bible(dir) then M._root = vim.fs.normalize(vim.uv.fs_realpath(dir) or dir) end
+    return M._root
+  end
+  local ok, notes = pcall(require, 'config.notes')
+  local vault = ok and notes.current() or nil
+  if not vault then return end
+  vault = vim.fs.normalize(vim.uv.fs_realpath(vault) or vault)
+  M._missing = M._missing or {}
+  if M._missing[vault] then return end
+  local st = M.state()
+  st.roots = st.roots or {}
+  local found = st.roots[vault] and vault .. '/' .. st.roots[vault]
+  if not (found and is_bible(found)) then
+    found = nil
+    for _, f in ipairs(vim.fs.find('books.json', { path = vault, type = 'file', limit = math.huge })) do
+      local dir = vim.fs.dirname(f)
+      local rel = dir:sub(#vault + 2)
+      if not (rel:find '^%.' or rel:find '/%.') and is_bible(dir) then
+        found = dir
+        break
+      end
+    end
+    if not found then
+      M._missing[vault] = true
+      return
+    end
+    st.roots[vault] = found:sub(#vault + 2)
+    M.save_state()
+  end
+  M._root = found
+  return found
+end
+
+function read_json(path)
   local ok, data = pcall(function() return vim.json.decode(table.concat(vim.fn.readfile(path), '\n')) end)
   return ok and data or nil
 end
@@ -36,10 +65,7 @@ function M.meta()
   if M._meta then return M._meta end
   local root = M.root()
   local meta = root and read_json(root .. '/books.json')
-  if not meta then
-    vim.notify('Bible not found (looked for ' .. BIBLE_DIR .. '/books.json)', vim.log.levels.ERROR)
-    return nil
-  end
+  if not meta then return nil end
   meta.by_id = {}
   for _, b in ipairs(meta.books) do
     meta.by_id[b.id] = b
@@ -194,6 +220,7 @@ function M._parse_lines(lines)
     elseif ch > 0 then
       local v, sub, to, text = line:match '^(%d+)(%l?)%-?(%d*)%. (.*)$'
       if v then
+        text = text:gsub(M.BLOCK_ID, '')
         local verse = { ch = ch, v = tonumber(v), sub = sub, to = tonumber(to), line = i, text = text }
         table.insert(res.list, verse)
         res.at[ch .. ':' .. v .. sub] = res.at[ch .. ':' .. v .. sub] or verse
@@ -205,6 +232,52 @@ function M._parse_lines(lines)
     end
   end
   return res
+end
+
+-- Block ids ending verse lines (" ^3-16"), so Obsidian can link to a verse: [[56 John#^3-16]]
+M.BLOCK_ID = ' %^%d+%-%d+%l?$'
+
+--- Block id of verse ch:v(sub): "3-16", "1-1a"
+function M.block_id(ch, v, sub) return ('%d-%d%s'):format(ch, v, sub or '') end
+
+--- Book files by name, for links to them: { ['56 John'] = {book, lang},
+--- ['Resources/…/en/56 John'] = …, ... }, and how many languages share each name
+function M.link_names()
+  if M._link_names then return M._link_names end
+  local meta, root = M.meta(), M.root()
+  local ok, notes = pcall(require, 'config.notes')
+  local vault = ok and root and notes.root(root)
+  local names, count = {}, {}
+  for _, b in ipairs(meta and meta.books or {}) do
+    for _, lang in ipairs(meta.lang_order) do
+      local f = M.file(b.id, lang)
+      if f then
+        local stem = vim.fn.fnamemodify(f, ':t:r')
+        names[stem] = { book = b.id, lang = lang }
+        count[stem] = (count[stem] or 0) + 1
+        if vault then names[f:sub(#vault + 2):gsub('%.md$', '')] = { book = b.id, lang = lang } end
+      end
+    end
+  end
+  M._link_names = { names = names, count = count, vault = vault }
+  return M._link_names
+end
+
+--- What a link points at ("56 John", "Resources/…/en/38 Amos", with or without ".md"): book, lang
+function M.link_book(target)
+  local hit = M.link_names().names[(target:gsub('%.md$', ''))]
+  if hit then return hit.book, hit.lang end
+end
+
+--- How to link to a book file: its name, or its path in the vault where another language's
+--- file has the same name ("38 Amos" is English and Serbian), as Obsidian does
+function M.link_target(book, lang)
+  local f = M.file(book, lang)
+  if not f then return end
+  local ln = M.link_names()
+  local stem = vim.fn.fnamemodify(f, ':t:r')
+  if (ln.count[stem] or 0) > 1 and ln.vault then return (f:sub(#ln.vault + 2):gsub('%.md$', '')) end
+  return stem
 end
 
 --- The verse printed on line `lnum` of a book file
