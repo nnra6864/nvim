@@ -18,9 +18,10 @@ return {
       ['<CR>'] = {
         'accept',
         function()
-          if require('config.lists').handles() then
-            return vim.keycode '<Cmd>lua require("config.lists").newline()<CR>'
-          end
+          if require('config.lists').in_fence_pair() then return vim.keycode '<Cmd>lua require("config.lists").split_fence()<CR>' end
+        end,
+        function()
+          if require('config.lists').handles() then return vim.keycode '<Cmd>lua require("config.lists").newline()<CR>' end
         end,
         'fallback',
       },
@@ -69,16 +70,12 @@ return {
             if vim.bo.filetype == 'markdown' then
               local ok, parser = pcall(vim.treesitter.get_parser, 0)
               local row, col = cursor[1] - 1, cursor[2]
-              if ok and parser and parser:language_for_range({ row, col, row, col }):lang() == 'yaml' then
-                return false
-              end
+              if ok and parser and parser:language_for_range({ row, col, row, col }):lang() == 'yaml' then return false end
             end
             local ok, node = pcall(vim.treesitter.get_node, { pos = { cursor[1] - 1, math.max(cursor[2] - 1, 0) } })
             while ok and node do
               local type = node:type()
-              if type:find 'string' or type:find 'comment' or type:find 'quote_scalar' or type:find 'block_scalar' then
-                return false
-              end
+              if type:find 'string' or type:find 'comment' or type:find 'quote_scalar' or type:find 'block_scalar' then return false end
               node = node:parent()
             end
             return true

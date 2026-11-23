@@ -5,8 +5,25 @@
 --           On an empty item it outdents, then removes the marker; on an empty > line it leaves the quote
 --   <S-CR>  new line inside the same item: no marker, aligned with the item's text, quote kept
 --   o       like <CR> at the end of the line
+-- In any filetype, <CR> in ```lua|``` splits it into a code block with the cursor inside.
 -- <CR> is wired through blink.cmp (plugins/blink.lua), so an open completion menu is accepted first.
 local M = {}
+
+--- True when the cursor is between a fence's ```<language> and the closing ``` on the same line
+function M.in_fence_pair()
+  local line, col = vim.api.nvim_get_current_line(), vim.fn.col '.' - 1
+  return line:sub(1, col):match '```[%w_+#.-]*$' ~= nil and line:sub(col + 1) == '```'
+end
+
+--- ```lua|``` -> ```lua / | / ```, inside the line's quote and list item
+function M.split_fence()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local before = vim.api.nvim_get_current_line():sub(1, col)
+  -- Quote markers and indent stay, a list marker becomes spaces
+  local indent = before:match('^(.-)```'):gsub('[^%s>]', ' ')
+  vim.api.nvim_buf_set_lines(0, row - 1, row, false, { before, indent, indent .. '```' })
+  vim.api.nvim_win_set_cursor(0, { row + 1, #indent })
+end
 
 M.filetypes = { markdown = true, text = true, gitcommit = true }
 
@@ -83,8 +100,7 @@ function M.newline(same_item)
   if p.text:match '^%s*$' then
     if p.marker ~= '' and p.indent ~= '' then
       -- Empty nested item: one level out
-      local indent = p.indent:sub(-1) == '\t' and p.indent:sub(1, -2)
-        or p.indent:sub(1, math.max(0, #p.indent - vim.fn.shiftwidth()))
+      local indent = p.indent:sub(-1) == '\t' and p.indent:sub(1, -2) or p.indent:sub(1, math.max(0, #p.indent - vim.fn.shiftwidth()))
       local new = p.quote .. indent .. p.marker
       return set_line_and_cursor(row, { new }, #new)
     end
