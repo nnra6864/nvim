@@ -15,14 +15,11 @@ map('n', '<leader>Z', function() Snacks.zen.zoom() end, { desc = 'Zoom window' }
 map({ 'n', 't' }, ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
 map({ 'n', 't' }, '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
 
--- Flash: s jump, S select a syntax block, r/R act on a distant spot in operators (yr, dR, ...)
+-- Flash: <leader>j jumps to any visible spot (type its first chars, then the label shown there)
 local flash = function(fn)
   return function() require('flash')[fn]() end
 end
-map({ 'n', 'x', 'o' }, 's', flash 'jump', { desc = 'Flash jump' })
-map({ 'n', 'x', 'o' }, 'S', flash 'treesitter', { desc = 'Flash select syntax block' })
-map('o', 'r', flash 'remote', { desc = 'Flash remote' })
-map('o', 'R', flash 'treesitter_search', { desc = 'Flash search syntax blocks' })
+map({ 'n', 'x', 'o' }, '<leader>j', flash 'jump', { desc = 'Flash jump' })
 map('c', '<C-s>', flash 'toggle', { desc = 'Toggle flash labels in search' })
 map('n', 'gC', function() require('treesitter-context').go_to_context(vim.v.count1) end, { desc = 'Go to pinned context' })
 

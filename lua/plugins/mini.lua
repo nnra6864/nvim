@@ -28,7 +28,7 @@ return {
 
     -- Editing
     require('mini.ai').setup { n_lines = 500 }
-    -- Under gs, since flash uses s: gsa add, gsd delete, gsr replace, gsf/gsF find, gsh highlight
+    -- Under gs, so s stays stock Vim: gsa add, gsd delete, gsr replace, gsf/gsF find, gsh highlight
     require('mini.surround').setup {
       mappings = { add = 'gsa', delete = 'gsd', find = 'gsf', find_left = 'gsF', highlight = 'gsh', replace = 'gsr', update_n_lines = 'gsn' },
     }
