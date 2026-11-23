@@ -40,7 +40,8 @@ return {
     --   - the line already has an unclosed one  "a| -> "a"
     --   - (' only) a letter is right before     don| -> don't
     -- otherwise pair as usual (a| -> a""). Typing a closer before an existing one jumps over it.
-    -- In Markdown, a \ inside `code` is literal, so `\` closes and pairing continues after it.
+    -- In Markdown, a \ inside `code` is literal, so `\` closes and pairing continues after it,
+    -- and ` in an empty span widens it: `|` -> ``|`` -> ```|```.
     -- ``` at the start of a line (after any quote or list marker) opens a code block, ```|```
     -- (<CR> after the language splits it, config/lists.lua), or closes the one already open.
     local smart_pairs = true
@@ -59,16 +60,14 @@ return {
         local prefix = l:match '^(.-)```'
         return prefix ~= nil and fence_prefix(prefix)
       end
-      -- The third ` of a fence: opens a block (```|```), or closes the open one above
-      local function fence(before, after)
-        local prefix = before:match '^(.-)``$'
-        if not prefix or after ~= '' or not fence_prefix(prefix) then return end
+      local function in_fenced_block()
         local open = false
         for _, l in ipairs(vim.api.nvim_buf_get_lines(0, 0, vim.fn.line '.' - 1, false)) do
           if is_fence(l) then open = not open end
         end
-        return open and '`' or '````' .. vim.keycode('<C-g>U<Left>'):rep(3)
+        return open
       end
+      local left = vim.keycode '<C-g>U<Left>'
       -- Markdown code spans: outside them \ escapes, inside a run of N ` closes only on N `
       local function in_code_span(s)
         local i, open = 1, nil
@@ -96,13 +95,22 @@ return {
           local line, col = vim.api.nvim_get_current_line(), vim.fn.col '.' - 1
           local before, after = line:sub(1, col), line:sub(col + 1)
           local prev, next = before:sub(-1), after:sub(1, 1)
+          local markdown = vim.bo.filetype == 'markdown'
+          if q == '`' and after == '' and fence_prefix((before:gsub('`*$', ''))) then
+            -- The closing fence of an open block: typed as is
+            if in_fenced_block() then return q end
+            -- Outside Markdown, ` then ` jumps over the pair, so the third one opens the block
+            if not markdown and before:match '``$' then return '````' .. left:rep(3) end
+          end
+          -- Markdown: ` in an empty code span widens it, `|` -> ``|`` -> ```|``` (a code block at line start)
+          if q == '`' and markdown then
+            local run = #before:match '`*$'
+            -- (only an opening run: in ``x`|` the run before the cursor is closing the span)
+            if run > 0 and run == #after:match '^`*' and not in_code_span(before:sub(1, -run - 1)) then return '``' .. left end
+          end
           if next == q then return MiniPairs.closeopen(q .. q, '..') end
           local unclosed
-          if q == '`' then
-            local keys = fence(before, after)
-            if keys then return keys end
-          end
-          if q == '`' and vim.bo.filetype == 'markdown' then
+          if q == '`' and markdown then
             unclosed = in_code_span(before)
           else
             local _, unescaped = before:gsub('\\.', ''):gsub(vim.pesc(q), '')
