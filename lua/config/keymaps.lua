@@ -22,7 +22,7 @@ end
 map({ 'n', 'x', 'o' }, 's', flash 'jump', { desc = 'Flash jump' })
 map({ 'n', 'x', 'o' }, 'S', flash 'treesitter', { desc = 'Flash select syntax block' })
 map('o', 'r', flash 'remote', { desc = 'Flash remote' })
-map({ 'o', 'x' }, 'R', flash 'treesitter_search', { desc = 'Flash search syntax blocks' })
+map('o', 'R', flash 'treesitter_search', { desc = 'Flash search syntax blocks' })
 map('c', '<C-s>', flash 'toggle', { desc = 'Toggle flash labels in search' })
 map('n', 'gC', function() require('treesitter-context').go_to_context(vim.v.count1) end, { desc = 'Go to pinned context' })
 
