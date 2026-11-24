@@ -304,6 +304,7 @@ map('n', '<leader>gc', function()
     confirm = function(picker)
       local items = picker:selected { fallback = true }
       picker:close()
+      if #items == 0 then return end
       -- The log lists newest first, so a higher idx is older
       table.sort(items, function(a, b) return a.idx > b.idx end)
       local old, new = items[1].commit, items[#items].commit

@@ -10,12 +10,13 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 - **Theme**: colors from kosm, applied and live-reloaded by the plugin kosm writes into Neovim's data folder, with an oh-my-posh style statusline.
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
   Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
-  Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer. Files outside vaults never autosave.<br>
-  Starting `nvim` with no files inside a vault opens the note edited last.
+  Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer, or when Neovim loses focus. Files outside vaults never autosave.<br>
+  Starting `nvim` with no files inside a vault opens the note edited last.<br>
+  In Markdown, text and commit messages, `Enter` continues lists, checkboxes and quotes like the app does (`Shift+Enter` breaks the line inside the item).
 - **Bible**: an Orthodox Bible in the vault, in five languages with one numbering, so a reference is the same verse in all of them.<br>
   References and verse links in notes, every translation on hover, a parallel translation split, cross-references. See [Bible](#bible).
 - **Git**: lazygit, VSCode-style diffs between any two commits, file and line history, blame, hunks in the gutter.
-- **Files**: yazi instead of netrw.<br>
+- **Files**: yazi as the file manager; opening a directory (`nvim .`) opens the files picker instead of netrw.<br>
   Renaming or moving a file updates imports and note links.
 - **Formatting** on save only for languages with one official style (Zig, Dart, fish) or projects with their own formatter config.<br>
   Otherwise `<leader>f`.
@@ -89,12 +90,13 @@ Built-in Neovim keys are marked *(nvim)*.
 
 | Editing | |
 |---|---|
-| `s` / `S` | Jump anywhere / select a syntax block (flash) |
+| `<leader>j` | Jump anywhere: type a spot's first chars, then its label (flash) |
 | `gsa` `gsd` `gsr` | Add / delete / replace surrounding |
 | `Alt+hjkl` | Move line or selection |
 | `gcc`, `gc` | Comment *(nvim)* |
 | `ii` `ai`, `[i` `]i` | Indent scope as a text object, jump to its edges |
 | `]]` `[[` | Next / previous use of the symbol |
+| `Ctrl+s` | While searching with `/`: toggle flash labels on the matches |
 | `<leader>f` | Format |
 | `za` `zR` `zM` | Toggle fold / open all / close all *(nvim)* |
 
