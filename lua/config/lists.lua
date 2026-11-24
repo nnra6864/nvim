@@ -84,10 +84,12 @@ function M.handles()
   return p ~= nil and vim.fn.col '.' - 1 >= #p.quote + #p.indent + #p.marker
 end
 
---- <CR>, or <S-CR> when `same_item`. Call only when M.handles() (or as <S-CR>, which falls back itself)
-function M.newline(same_item)
+--- <CR>, or <S-CR> when `same_item`. Call only when M.handles() (or as <S-CR>, which falls back itself).
+--- `at_end` splits at the end of the line instead of the cursor
+function M.newline(same_item, at_end)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local line = vim.api.nvim_get_current_line()
+  if at_end then col = #line end
   local p = parse(line)
   if not p then return vim.api.nvim_feedkeys(vim.keycode '<CR>', 'n', false) end
   local before, after = line:sub(1, col), line:sub(col + 1)
@@ -121,7 +123,8 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.keymap.set('i', '<S-CR>', function() M.newline(true) end, { buffer = ev.buf, desc = 'New line in this item' })
     vim.keymap.set('n', 'o', function()
       if not parse(vim.api.nvim_get_current_line()) then return 'o' end
-      return 'A<Cmd>lua require("config.lists").newline()<CR>'
+      -- Not A: a count (3o) would repeat the text typed after it on the same line
+      return '<Cmd>lua require("config.lists").newline(false, true); vim.cmd.startinsert { bang = true }<CR>'
     end, { buffer = ev.buf, expr = true, desc = 'Next list item / quote line' })
   end,
 })
