@@ -109,7 +109,10 @@ map('n', '<leader>ss', pick 'pickers', { desc = 'All pickers' })
 -- Replace (grug-far): in the selection's text, or empty in normal mode; <leader>sF limits it to this file
 map('n', '<leader>sR', function() require('grug-far').open() end, { desc = 'Search and replace' })
 map('x', '<leader>sR', function() require('grug-far').with_visual_selection() end, { desc = 'Search and replace selection' })
-map('n', '<leader>sF', function() require('grug-far').open { prefills = { paths = vim.fn.expand '%' } } end, { desc = 'Search and replace in file' })
+-- grug-far splits paths on spaces, so they're escaped (timestamped notes have spaces in their names)
+map('n', '<leader>sF', function()
+  require('grug-far').open { prefills = { paths = (vim.fn.expand '%:.':gsub(' ', '\\ ')) } }
+end, { desc = 'Search and replace in file' })
 
 -- Notes (obsidian.nvim). Work from anywhere: they use the current vault, or the last one used
 local obsidian = function(cmd)
