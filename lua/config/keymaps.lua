@@ -7,13 +7,25 @@ local map = vim.keymap.set
 -- General
 map('n', '<Esc>', '<cmd>nohlsearch<CR>')
 map({ 'n', 'v' }, '<C-S-c>', '"+y', { desc = 'Copy to clipboard' })
-map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+-- Only in plain :terminal buffers. A global terminal map would hold back every <Esc> in lazygit
+-- and yazi (they use it themselves) until timeoutlen passes; snacks terminals have their own double <Esc>
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = vim.api.nvim_create_augroup('terminal-keymaps', { clear = true }),
+  callback = function(ev)
+    -- Plugins set their terminal's filetype right after it opens
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(ev.buf) or vim.bo[ev.buf].filetype ~= '' then return end
+      map('t', '<Esc><Esc>', '<C-\\><C-n>', { buffer = ev.buf, desc = 'Exit terminal mode' })
+    end)
+  end,
+})
 map('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Diagnostics to loclist' })
 map('n', '<leader>n', function() Snacks.picker.notifications() end, { desc = 'Notification history' })
 map('n', '<leader>z', function() Snacks.zen() end, { desc = 'Zen mode' })
 map('n', '<leader>Z', function() Snacks.zen.zoom() end, { desc = 'Zoom window' })
-map({ 'n', 't' }, ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
-map({ 'n', 't' }, '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
+-- Normal mode only: in terminals, ] and [ would wait for a second key (lazygit switches tabs with them)
+map('n', ']]', function() Snacks.words.jump(vim.v.count1) end, { desc = 'Next reference' })
+map('n', '[[', function() Snacks.words.jump(-vim.v.count1) end, { desc = 'Previous reference' })
 
 -- Flash: <leader>j jumps to any visible spot (type its first chars, then the label shown there)
 local flash = function(fn)
