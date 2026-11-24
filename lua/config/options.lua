@@ -15,6 +15,8 @@ vim.o.shiftwidth = 0
 vim.o.softtabstop = -1
 vim.o.expandtab = true
 vim.o.breakindent = true
+-- Wrapped lines break between words, not mid-word
+vim.o.linebreak = true
 
 -- Treesitter folds, everything open by default. Files without a parser just don't fold.
 vim.o.foldmethod = 'expr'
