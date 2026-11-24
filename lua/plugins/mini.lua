@@ -54,19 +54,8 @@ return {
       },
     }
     if smart_pairs then
-      -- Text before a fence's ``` is only a quote, indent and list marker
-      local function fence_prefix(s) return s:gsub('^[%s>]*', ''):gsub('^[-*+] ', ''):gsub('^%d+[.)] ', '') == '' end
-      local function is_fence(l)
-        local prefix = l:match '^(.-)```'
-        return prefix ~= nil and fence_prefix(prefix)
-      end
-      local function in_fenced_block()
-        local open = false
-        for _, l in ipairs(vim.api.nvim_buf_get_lines(0, 0, vim.fn.line '.' - 1, false)) do
-          if is_fence(l) then open = not open end
-        end
-        return open
-      end
+      local lists = require 'config.lists'
+      local fence_prefix = lists.fence_prefix
       local left = vim.keycode '<C-g>U<Left>'
       -- Markdown code spans: outside them \ escapes, inside a run of N ` closes only on N `
       local function in_code_span(s)
@@ -98,7 +87,7 @@ return {
           local markdown = vim.bo.filetype == 'markdown'
           if q == '`' and after == '' and fence_prefix((before:gsub('`*$', ''))) then
             -- The closing fence of an open block: typed as is
-            if in_fenced_block() then return q end
+            if lists.in_code_block(true) then return q end
             -- Outside Markdown, ` then ` jumps over the pair, so the third one opens the block
             if not markdown and before:match '``$' then return '````' .. left:rep(3) end
           end

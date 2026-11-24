@@ -5,6 +5,7 @@
 --           On an empty item it outdents, then removes the marker; on an empty > line it leaves the quote
 --   <S-CR>  new line inside the same item: no marker, aligned with the item's text, quote kept
 --   o       like <CR> at the end of the line
+-- Inside a fenced code block they're plain again: there - and > belong to the code.
 -- In any filetype, <CR> in ```lua|``` splits it into a code block with the cursor inside.
 -- <CR> is wired through blink.cmp (plugins/blink.lua), so an open completion menu is accepted first.
 local M = {}
@@ -26,6 +27,20 @@ function M.split_fence()
 end
 
 M.filetypes = { markdown = true, text = true, gitcommit = true }
+
+--- True when `s`, the text before a fence's ```, is only a quote, indent and list marker
+function M.fence_prefix(s) return s:gsub('^[%s>]*', ''):gsub('^[-*+] ', ''):gsub('^%d+[.)] ', '') == '' end
+
+--- True when the cursor line is inside a fenced code block (in Markdown, unless `any_filetype`)
+function M.in_code_block(any_filetype)
+  if not any_filetype and vim.bo.filetype ~= 'markdown' then return false end
+  local open = false
+  for _, l in ipairs(vim.api.nvim_buf_get_lines(0, 0, vim.fn.line '.' - 1, false)) do
+    local prefix = l:match '^(.-)```'
+    if prefix and M.fence_prefix(prefix) then open = not open end
+  end
+  return open
+end
 
 --- Splits a line into its quote prefix ("> ", "> > ", may include the indent after it), indent,
 --- list marker and text. nil when it's neither quoted nor a list item
@@ -78,7 +93,8 @@ end
 
 --- True when <CR> on the current line is ours to handle (blink.cmp asks before falling back)
 function M.handles()
-  if not M.filetypes[vim.bo.filetype] then return false end
+  -- In code, - and > are the code's own
+  if not M.filetypes[vim.bo.filetype] or M.in_code_block() then return false end
   local p = parse(vim.api.nvim_get_current_line())
   -- Only past the marker; with the cursor inside the prefix, <CR> stays a plain newline
   return p ~= nil and vim.fn.col '.' - 1 >= #p.quote + #p.indent + #p.marker
@@ -122,7 +138,7 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function(ev)
     vim.keymap.set('i', '<S-CR>', function() M.newline(true) end, { buffer = ev.buf, desc = 'New line in this item' })
     vim.keymap.set('n', 'o', function()
-      if not parse(vim.api.nvim_get_current_line()) then return 'o' end
+      if not parse(vim.api.nvim_get_current_line()) or M.in_code_block() then return 'o' end
       -- Not A: a count (3o) would repeat the text typed after it on the same line
       return '<Cmd>lua require("config.lists").newline(false, true); vim.cmd.startinsert { bang = true }<CR>'
     end, { buffer = ev.buf, expr = true, desc = 'Next list item / quote line' })
