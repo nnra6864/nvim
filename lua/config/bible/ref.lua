@@ -63,8 +63,9 @@ end
 -- Alias index ------------------------------------------------------------------------------
 
 local function index()
-  if M._index then return M._index end
   local meta = data.meta()
+  -- Rebuilt when another Bible comes into use
+  if M._index and M._index_meta == meta then return M._index end
   if not meta then return { exact = {}, list = {} } end
   local exact, list = {}, {}
   for _, b in ipairs(meta.books) do
@@ -77,7 +78,7 @@ local function index()
       end
     end
   end
-  M._index = { exact = exact, list = list }
+  M._index, M._index_meta = { exact = exact, list = list }, meta
   return M._index
 end
 M._get_index = index

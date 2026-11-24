@@ -6,12 +6,8 @@ local source = {}
 
 function source.new() return setmetatable({}, { __index = source }) end
 
---- In vault notes only (the Bible itself is found from anywhere, through the last vault used)
-function source:enabled()
-  if vim.bo.filetype ~= 'markdown' or not require('config.bible.data').root() then return false end
-  local name = vim.api.nvim_buf_get_name(0)
-  return require('config.notes').root(name) ~= nil or require('config.bible.data').locate(name) ~= nil
-end
+--- Only in a vault or repo with a Bible in it
+function source:enabled() return vim.bo.filetype == 'markdown' and require('config.bible.data').find(vim.api.nvim_buf_get_name(0)) ~= nil end
 
 function source:get_trigger_characters() return { ':', ',' } end
 

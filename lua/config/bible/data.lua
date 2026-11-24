@@ -1,4 +1,4 @@
--- The Bible in the vault (built by the Bible importer): where it is, its books and languages,
+-- The Bible (built by the Bible importer): where it is, its books and languages,
 -- the language you read in (remembered per machine), and the verses of a book file.
 -- Every translation uses the same (Russian Synodal) numbering, so a verse is the same
 -- book/chapter/verse in every language.
@@ -8,51 +8,119 @@ local state_file = vim.fn.stdpath 'state' .. '/bible.json'
 
 local function exists(path) return path and vim.uv.fs_stat(path) ~= nil end
 
+local function real(path) return vim.fs.normalize(vim.uv.fs_realpath(path) or path) end
+
+local function within(path, dir) return path == dir or path:sub(1, #dir + 1) == dir .. '/' end
+
 local read_json
 
 --- A Bible folder: its books.json lists the books and the numbering
 local function is_bible(dir)
-  local meta = exists(dir .. '/books.json') and read_json(dir .. '/books.json')
+  local meta = dir and exists(dir .. '/books.json') and read_json(dir .. '/books.json')
   return type(meta) == 'table' and meta.versification ~= nil and type(meta.books) == 'table'
 end
 
---- The Bible folder: vim.g.bible_root, else the one in the current (or last used) vault,
---- wherever it is in there (found once, then remembered per vault)
-function M.root()
-  if M._root then return M._root end
-  if vim.g.bible_root then
-    local dir = vim.fs.normalize(vim.g.bible_root)
-    if is_bible(dir) then M._root = vim.fs.normalize(vim.uv.fs_realpath(dir) or dir) end
-    return M._root
-  end
-  local ok, notes = pcall(require, 'config.notes')
-  local vault = ok and notes.current() or nil
-  if not vault then return end
-  vault = vim.fs.normalize(vim.uv.fs_realpath(vault) or vault)
-  M._missing = M._missing or {}
-  if M._missing[vault] then return end
+-- Finding the Bible -------------------------------------------------------------------------
+-- A Bible belongs to the vault (a folder with .obsidian) or else the git repo it's in, and
+-- works only there: references, keys and completion are on in that project's files alone.
+-- Pickers and :Bible work from anywhere, with the Bible of the current file or the last one used.
+
+--- The vault, else the git repo, `path` is in (never the home folder, which may be a dotfiles repo)
+function M.project(path)
+  local root = path and path ~= '' and vim.fs.root(path, { { '.obsidian' }, { '.git' } })
+  if root and root ~= vim.fs.normalize '~' then return root end
+end
+
+-- Folders skipped when looking for books.json (besides hidden ones)
+local SKIP = { node_modules = true, target = true, build = true, dist = true }
+
+--- The Bible folder somewhere in `project` (found once, then remembered per project)
+local function search(project)
   local st = M.state()
   st.roots = st.roots or {}
-  local found = st.roots[vault] and vault .. '/' .. st.roots[vault]
-  if not (found and is_bible(found)) then
-    found = nil
-    for _, f in ipairs(vim.fs.find('books.json', { path = vault, type = 'file', limit = math.huge })) do
-      local dir = vim.fs.dirname(f)
-      local rel = dir:sub(#vault + 2)
-      if not (rel:find '^%.' or rel:find '/%.') and is_bible(dir) then
-        found = dir
+  local remembered = st.roots[project] and project .. '/' .. st.roots[project]
+  if is_bible(remembered) then return remembered end
+  local g = vim.g.bible_root and real(vim.g.bible_root)
+  if g and within(g, project) and is_bible(g) then return g end
+  local candidates = {}
+  if exists(project .. '/.obsidian') then
+    for name, type in vim.fs.dir(project, { depth = 6, skip = function(dir) return not dir:match '^%.' and not SKIP[dir] end }) do
+      if type == 'file' and vim.fs.basename(name) == 'books.json' then table.insert(candidates, name) end
+    end
+  else
+    -- In a git repo, only what isn't ignored: a Bible in a build cache isn't the repo's own
+    local out = vim.system({ 'git', '-C', project, 'ls-files', '--cached', '--others', '--exclude-standard', '--', '*books.json' }, { text = true }):wait()
+    candidates = out.code == 0 and vim.split(out.stdout, '\n', { trimempty = true }) or {}
+  end
+  for _, name in ipairs(candidates) do
+    local dir = vim.fs.normalize(project .. '/' .. vim.fs.dirname(name))
+    if is_bible(dir) then
+      st.roots[project] = dir:sub(#project + 2)
+      M.save_state()
+      return dir
+    end
+  end
+end
+
+local found = {} -- path → Bible root, or false
+local by_project = {} -- project → Bible root, or false
+
+--- The Bible `path` (a file or folder) belongs to: vim.g.bible_root when it's inside that,
+--- else the one in its vault or repo. nil when there's none
+function M.find(path)
+  if not path or path == '' then return end
+  if found[path] ~= nil then return found[path] or nil end
+  local norm = vim.fs.normalize(path)
+  local g = vim.g.bible_root and real(vim.g.bible_root)
+  local root
+  if g and within(norm, g) and is_bible(g) then
+    root = g
+  else
+    local project = M.project(norm)
+    project = project and real(project)
+    if project then
+      if by_project[project] == nil then by_project[project] = search(project) or false end
+      root = by_project[project] or nil
+    end
+  end
+  found[path] = root or false
+  return root
+end
+
+local active ---@type string?
+
+--- Switches the Bible in use; its books, names and caches are read again
+function M.use(root)
+  if root == active then return end
+  active = root
+  M._meta, M._files, M._link_names, M._extras, M._xrefs, M._parsed, M._by_buf = nil, nil, nil, nil, nil, nil, nil
+  if root and M.state().last_root ~= root then
+    M.state().last_root = root
+    M.save_state()
+  end
+end
+
+--- Picks the Bible of the current file (else of the cwd); where there's none, the one in use
+--- stays, else the last one used
+function M.refresh()
+  local name = vim.bo.buftype == '' and vim.api.nvim_buf_get_name(0) or ''
+  local root = M.find(name ~= '' and name or vim.fn.getcwd())
+  if not root and not active then
+    local st = M.state()
+    for _, dir in ipairs { st.last_root, unpack(vim.tbl_map(function(p) return p .. '/' .. st.roots[p] end, vim.tbl_keys(st.roots or {}))) } do
+      if is_bible(dir) then
+        root = dir
         break
       end
     end
-    if not found then
-      M._missing[vault] = true
-      return
-    end
-    st.roots[vault] = found:sub(#vault + 2)
-    M.save_state()
   end
-  M._root = found
-  return found
+  if root then M.use(root) end
+end
+
+--- The Bible folder in use (see M.refresh), or nil
+function M.root()
+  if not active then M.refresh() end
+  return active
 end
 
 function read_json(path)
@@ -168,8 +236,9 @@ end
 
 --- If `path` is a book file: book id, lang
 function M.locate(path)
-  local root = M.root()
-  if not (root and path and path ~= '') then return end
+  local root = M.find(path)
+  if not root then return end
+  M.use(root)
   path = vim.fs.normalize(path)
   if path:sub(1, #root + 1) ~= root .. '/' then
     local real = vim.uv.fs_realpath(path)
@@ -245,8 +314,8 @@ function M.block_id(ch, v, sub) return ('%d-%d%s'):format(ch, v, sub or '') end
 function M.link_names()
   if M._link_names then return M._link_names end
   local meta, root = M.meta(), M.root()
-  local ok, notes = pcall(require, 'config.notes')
-  local vault = ok and root and notes.root(root)
+  -- Link paths are relative to the vault (or repo)
+  local vault = root and M.project(root)
   local names, count = {}, {}
   for _, b in ipairs(meta and meta.books or {}) do
     for _, lang in ipairs(meta.lang_order) do

@@ -179,7 +179,8 @@ Built-in Neovim keys are marked *(nvim)*.
 
 The Bible lives in the vault as Markdown, one file per book and language (sr-Cyrl, sr-Latn, ru, el, en), built by a separate importer.
 Every language uses the printed Russian Synodal numbering, so `Jn 3:16` is the same verse in all of them.
-The plugin finds the Bible folder in the current vault by its `books.json`; `vim.g.bible_root` overrides that.
+The plugin finds the Bible by its `books.json`, anywhere in the vault (or git repo) of the file you're in; `vim.g.bible_root` points it at one directly.
+References, their keys and completion work only in a vault or repo that has a Bible. The pickers and `:Bible` work from anywhere, with the last Bible used.
 
 **Citing in notes**, either way works in Neovim:
 

@@ -436,10 +436,8 @@ end
 
 -- Backlinks --------------------------------------------------------------------------------
 
-local function vault_root()
-  local ok, notes = pcall(require, 'config.notes')
-  return ok and data.root() and notes.root(data.root()) or nil
-end
+--- The vault (or repo) the Bible in use is in
+local function vault_root() return data.root() and data.project(data.root()) end
 
 --- Notes in the vault referring to the reference (or verse/chapter) at the cursor
 function M.backlinks()
@@ -593,6 +591,8 @@ end
 
 function M.setup()
   local group = vim.api.nvim_create_augroup('bible', { clear = true })
+  -- The Bible in use follows the file (or working directory) you're in
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'DirChanged' }, { group = group, callback = function() data.refresh() end })
   vim.api.nvim_create_autocmd('BufWinEnter', {
     group = group,
     pattern = '*.md',

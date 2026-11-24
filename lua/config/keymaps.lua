@@ -181,12 +181,10 @@ toggle('<leader>bx', 'Bible cross-references', function() return require('config
 local function bible_keys(buf)
   if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].filetype ~= 'markdown' then return end
   local b = require 'config.bible'
-  if not b.data.root() then return end
-  -- Vault notes and the books themselves; elsewhere (a project's README) "Gen 3" or "Rom 2" aren't verses
+  -- Only in a vault or repo with a Bible in it; elsewhere "Gen 3" or "Rom 2" aren't verses
   local name = vim.api.nvim_buf_get_name(buf)
-  local in_bible = b.data.locate(name)
-  if not in_bible and not require('config.notes').root(name) then return end
-  if not in_bible then b.highlight_refs(buf) end
+  if not b.data.find(name) then return end
+  if not b.data.locate(name) then b.highlight_refs(buf) end
   b.wrap_key(buf, 'n', '<CR>', function() return b.follow() end, 'Follow reference')
   b.wrap_key(buf, 'n', 'gd', function() return b.follow() end, 'Follow reference')
   b.wrap_key(buf, 'n', 'K', function() return b.hover() end, 'Verse in every translation')
