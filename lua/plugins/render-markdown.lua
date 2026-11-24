@@ -11,6 +11,7 @@ return {
       custom = { todo = { raw = '[-]', rendered = '󰜺 ', highlight = 'Comment', scope_highlight = '@markup.strikethrough' } },
     },
     -- Needs utftex or latex2text; math is rendered as images by snacks.image instead
+    -- (with tectonic and the latex parser)
     latex = { enabled = false },
   },
 }

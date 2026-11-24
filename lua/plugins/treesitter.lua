@@ -2,6 +2,8 @@ local parsers = {
   -- Languages
   'bash', 'c', 'cpp', 'c_sharp', 'dart', 'fish', 'lua', 'luadoc', 'markdown', 'markdown_inline',
   'python', 'typst', 'yaml', 'zig',
+  -- Math in Markdown ($…$), so snacks.image can render it (with tectonic)
+  'latex',
   -- Neovim
   'vim', 'vimdoc', 'query',
   -- Misc files you'll end up editing anyway

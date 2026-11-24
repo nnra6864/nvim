@@ -44,14 +44,10 @@ All committed, none pushed.
 
 ## TODO (for you)
 
-- [ ] **Math rendering.** Notes' `$…$` / `$$…$$` is LaTeX (that's what Obsidian renders), and nothing renders it now:
-  - `render-markdown.lua` turns its own LaTeX off, and its comment says snacks.image does it instead.
-  - snacks.image needs `tectonic` (or `pdflatex`) **and** the `latex` treesitter parser. Neither is there.
-  - To enable it:
-    1. `sudo pacman -S tectonic`
-    2. Add `'latex'` to the parsers in `lua/plugins/treesitter.lua` (built with `tree-sitter-cli`, which you have).
-  - Typst math in `.typ` files goes through `typst`, which is installed, so it should already render. Typst *inside Markdown* isn't a thing Obsidian or any renderer understands.
-  - Your vault currently has no math (the `$…$` hits are shell snippets), so this is low priority.
+- [ ] **Math rendering:** run `sudo pacman -S tectonic`; that's all that's left.
+  - Notes' `$…$` / `$$…$$` is LaTeX (what Obsidian renders); snacks.image renders it with `tectonic` and the `latex` treesitter parser.
+  - The parser is now in `lua/plugins/treesitter.lua`, and `tectonic` is in the README's install lines.
+  - Typst math in `.typ` files goes through `typst`, which is installed. Typst *inside Markdown* isn't something Obsidian or any renderer understands.
 - [ ] **Split the Bible into its own repo.** It's self-contained now. What's left:
   - Rename the `config.bible.*` requires to the plugin's namespace.
   - Decide whether the keymaps stay in `config/keymaps.lua` (the `<leader>b` maps and the `bible_keys` autocmd that wraps `<CR>`/`gd`/`K`/`gy`/`grr`) or move into the plugin with a `setup({ keys = … })`. `wrap_key` would go with them.

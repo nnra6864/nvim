@@ -26,7 +26,7 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 
 - Everything:
 ```sh
-sudo pacman -S --needed neovim git base-devel tree-sitter-cli ripgrep fd yazi lazygit clang lua-language-server marksman ruff ty tinymist bash-language-server shellcheck yaml-language-server stylua shfmt jq websocat imagemagick ghostscript typst gdb python-debugpy
+sudo pacman -S --needed neovim git base-devel tree-sitter-cli ripgrep fd yazi lazygit clang lua-language-server marksman ruff ty tinymist bash-language-server shellcheck yaml-language-server stylua shfmt jq websocat imagemagick ghostscript typst tectonic gdb python-debugpy
 dotnet tool install --global roslyn-language-server --prerelease
 mkdir -p ~/.local/share/netcoredbg ~/.local/bin && curl -L https://github.com/Samsung/netcoredbg/releases/latest/download/netcoredbg-linux-amd64.tar.gz | tar xz -C ~/.local/share/netcoredbg --strip-components=1 && ln -sf ~/.local/share/netcoredbg/netcoredbg ~/.local/bin/netcoredbg
 ```
@@ -53,9 +53,9 @@ sudo pacman -S --needed stylua shfmt jq
 ```sh
 sudo pacman -S --needed websocat
 ```
-- Images in the editor (any format but PNG, PDFs, Typst math):
+- Images in the editor (any format but PNG, PDFs, Typst math, LaTeX math in Markdown):
 ```sh
-sudo pacman -S --needed imagemagick ghostscript typst
+sudo pacman -S --needed imagemagick ghostscript typst tectonic
 ```
 - Debuggers for C/C++/Zig and Python (Dart/Flutter use the Flutter SDK):
 ```sh
