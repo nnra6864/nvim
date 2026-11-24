@@ -4,7 +4,7 @@
 return {
   -- Fork: upstream main plus faster [[ completion and vault indexing; tracks a branch, since
   -- upstream release tags would skip the fork's commits
-  url = 'https://git.nnstdios.com/nnra6864/obsidian.nvim',
+  'nnra6864/obsidian.nvim',
   branch = 'better-completion',
   cmd = 'Obsidian',
   -- Loads for Markdown files inside a vault (any folder with .obsidian), never outside one
