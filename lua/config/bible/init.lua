@@ -56,8 +56,8 @@ function M.cursor_verse(win)
   return { book = book, lang = lang, ch = ch, line = row }
 end
 
---- The reference under the cursor in any buffer (in a Bible buffer, a written reference first,
---- then the verse itself), or nil
+--- The reference written under the cursor, or nil. Not in Bible buffers, where the verse
+--- at the cursor (M.cursor_verse) is what counts
 function M.cursor_ref(win)
   win = win or vim.api.nvim_get_current_win()
   local buf = vim.api.nvim_win_get_buf(win)

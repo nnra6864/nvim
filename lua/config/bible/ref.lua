@@ -80,7 +80,6 @@ local function index()
   M._index = { exact = exact, list = list }
   return M._index
 end
-M._index = nil
 M._get_index = index
 
 local function prefer(cands, lang)
@@ -187,9 +186,6 @@ function M.from_id(id)
   local c1, c2 = rest:match '^(%d+)%-?(%d*)$'
   if c1 then return { book = book, ch = tonumber(c1), ch2 = tonumber(c2) } end
 end
-
---- Canonical id: "JHN.3.16"
-function M.id(r) return ('%s.%d.%s'):format(r.book, r.ch, (r.v or '') .. (r.sub or '')) end
 
 --- Does reference `r` include verse (ch, v)?
 function M.contains(r, ch, v)
