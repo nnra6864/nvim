@@ -1,4 +1,5 @@
 {
+  "blink-emoji.nvim": { "branch": "master", "commit": "1ea4ef2e4699ef1a517a56a4e05ceba68c31be68" },
   "blink.cmp": { "branch": "main", "commit": "78336bc89ee5365633bcf754d93df01678b5c08f" },
   "codediff.nvim": { "branch": "main", "commit": "eee54e78e6f152a6eb03b090e95f7576c96a5ad9" },
   "conform.nvim": { "branch": "master", "commit": "016802de402556da54c36bd7359b441266b01cdd" },

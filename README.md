@@ -106,6 +106,7 @@ Built-in Neovim keys are marked *(nvim)*.
 | `Enter`, `Ctrl+y` | Accept selection / accept ghost text |
 | `Tab` `Shift+Tab` | Next / previous item or snippet field |
 | `Ctrl+e`, `Ctrl+Enter` | Close / toggle docs |
+| `:sob` then `Ctrl+j` | Emoji (inserts 😭) in Markdown, commit messages and text |
 
 | LSP | |
 |---|---|
@@ -211,7 +212,7 @@ Cross-references come from the Serbian and English editions, and optionally Open
 - [lazy.nvim](https://github.com/folke/lazy.nvim): plugin manager
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig), [lazydev.nvim](https://github.com/folke/lazydev.nvim): language server configs, Neovim Lua API
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter), [nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context): parsers, pinned context
-- [blink.cmp](https://github.com/saghen/blink.cmp), [friendly-snippets](https://github.com/rafamadriz/friendly-snippets): completion, snippets
+- [blink.cmp](https://github.com/saghen/blink.cmp), [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim): completion, snippets, emoji
 - [conform.nvim](https://github.com/stevearc/conform.nvim): formatting
 - [mini.nvim](https://github.com/nvim-mini/mini.nvim): statusline, icons, pairs, surround, text objects, align, move, highlights, git and diff signs
 - [snacks.nvim](https://github.com/folke/snacks.nvim): picker, notifications, indent guides, images, lazygit, zen, smooth scroll, toggles

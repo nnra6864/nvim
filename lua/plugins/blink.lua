@@ -3,7 +3,7 @@ return {
   version = '1.*',
   -- Not lazy: it registers its LSP capabilities when loaded, and servers started before that miss them
   lazy = false,
-  dependencies = { 'rafamadriz/friendly-snippets' },
+  dependencies = { 'rafamadriz/friendly-snippets', 'moyiz/blink-emoji.nvim' },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
@@ -58,7 +58,10 @@ return {
       default = { 'lsp', 'path', 'snippets' },
       per_filetype = {
         lua = { inherit_defaults = true, 'lazydev' },
-        markdown = { inherit_defaults = true, 'unresolved_links', 'bible' },
+        -- Emoji only in prose: in code ":" is everywhere (methods, slices, YAML, ::)
+        markdown = { inherit_defaults = true, 'unresolved_links', 'bible', 'emoji' },
+        gitcommit = { inherit_defaults = true, 'emoji' },
+        text = { inherit_defaults = true, 'emoji' },
       },
       providers = {
         -- Not inside strings or comments: there snippet prefixes fuzzy-match ordinary words
@@ -86,6 +89,8 @@ return {
         unresolved_links = { name = 'Unresolved', module = 'config.unresolved_links', score_offset = -2 },
         -- Bible book names, and verse numbers (with their text) after "Jn 3:"
         bible = { name = 'Bible', module = 'config.bible.blink', score_offset = -3 },
+        -- :sob → 😭, inserting the character itself (like Obsidian's Emoji Shortcodes)
+        emoji = { name = 'Emoji', module = 'blink-emoji' },
       },
     },
 
