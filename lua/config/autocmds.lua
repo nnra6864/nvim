@@ -64,6 +64,24 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
+-- When Neovim exits because its terminal went away (a killed tuios session), its buffers are
+-- already half unloaded while the LSP servers shut down. Anything that touches one then (which-key,
+-- the statusline redrawing) reads it in again, which resets the cursor, and that reset position is
+-- what gets saved for next time. So the state is saved as soon as the terminal goes, while the
+-- cursors are still right, and the save on exit is skipped.
+vim.api.nvim_create_autocmd('UILeave', {
+  group = group,
+  desc = 'Save cursor positions before exiting with the terminal',
+  callback = function()
+    if #vim.api.nvim_list_uis() > 0 or vim.o.shada == '' then return end
+    vim.cmd.wshada()
+    local shada = vim.o.shada
+    vim.o.shada = ''
+    -- A UI that detaches without Neovim exiting (--remote-ui) gets the save on exit back
+    vim.api.nvim_create_autocmd('UIEnter', { group = group, once = true, callback = function() vim.o.shada = shada end })
+  end,
+})
+
 -- `nvim` with no files, inside a vault, opens the note edited last, like the Obsidian app
 vim.api.nvim_create_autocmd('VimEnter', {
   group = group,
