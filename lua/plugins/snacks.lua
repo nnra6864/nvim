@@ -69,4 +69,19 @@ return {
       url_patterns = { ['git%.nnstdios%.com'] = forgejo, ['codeberg%.org'] = forgejo },
     },
   },
+  config = function(_, opts)
+    require('snacks').setup(opts)
+    -- Markdown's treesitter nodes end at column 0 of the next line, so snacks counts a list
+    -- item with no children as two lines and makes it the scope: on a child item nothing lit up.
+    -- Indent-based scope there lights the guide of the list the cursor is in.
+    local get = Snacks.scope.get
+    ---@diagnostic disable-next-line: duplicate-set-field
+    Snacks.scope.get = function(cb, o)
+      local buf = o and o.buf ~= 0 and o.buf or vim.api.nvim_get_current_buf()
+      if vim.bo[buf].filetype == 'markdown' then
+        o = vim.tbl_deep_extend('force', o or {}, { treesitter = { enabled = false } })
+      end
+      return get(cb, o)
+    end
+  end,
 }
