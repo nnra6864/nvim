@@ -269,8 +269,9 @@ function M.new(todo)
   vim.api.nvim_win_set_cursor(0, { header + 1, 0 })
 end
 
---- The most recently modified note in `vault`. Folders with a books.json (the Bible) are
---- skipped, since regenerating it touches every book.
+--- The most recently edited note in `vault`, moves and renames included: they keep a file's
+--- mtime, so the ctime (bumped by writes and moves alike) is compared instead.
+--- Folders with a books.json (the Bible) are skipped, since regenerating it touches every book.
 function M.last_edited(vault)
   local best, best_time
   local function scan(dir)
@@ -281,7 +282,7 @@ function M.last_edited(vault)
         scan(path)
       elseif type == 'file' and name:match '%.md$' then
         local stat = vim.uv.fs_stat(path)
-        if stat and (not best_time or stat.mtime.sec > best_time) then best, best_time = path, stat.mtime.sec end
+        if stat and (not best_time or stat.ctime.sec > best_time) then best, best_time = path, stat.ctime.sec end
       end
     end
   end
