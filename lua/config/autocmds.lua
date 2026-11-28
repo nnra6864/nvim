@@ -82,17 +82,18 @@ vim.api.nvim_create_autocmd('UILeave', {
   end,
 })
 
--- `nvim` with no files, inside a vault, opens the note edited last, like the Obsidian app
+-- `nvim` with no files, inside a vault, opens the note open last time, like the Obsidian app
+-- (or, with no history in that vault, the note edited last)
 vim.api.nvim_create_autocmd('VimEnter', {
   group = group,
-  desc = 'Open the last edited note when starting in a vault',
+  desc = 'Open the last opened note when starting in a vault',
   -- So the note's own autocmds (filetype, obsidian.nvim) run
   nested = true,
   callback = function()
     if vim.fn.argc() > 0 or vim.api.nvim_buf_get_name(0) ~= '' or vim.bo.modified or vim.bo.buftype ~= '' then return end
     local notes = require 'config.notes'
     local vault = notes.root(vim.fn.getcwd())
-    local note = vault and notes.last_edited(vault)
+    local note = vault and (notes.last_opened(vault) or notes.last_edited(vault))
     if note then vim.cmd.edit(vim.fn.fnameescape(note)) end
   end,
 })

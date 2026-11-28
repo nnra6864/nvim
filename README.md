@@ -11,7 +11,7 @@ One file per plugin in [`lua/plugins`](lua/plugins), every keymap in [`lua/confi
 - **Notes**: replaces Obsidian inside any vault (a folder with `.obsidian`).<br>
   Links, backlinks, renames that fix links, timestamped notes, and TODO notes that carry open tasks over.<br>
   Notes autosave like in the app: a second after you stop typing, and on leaving insert mode or the buffer, or when Neovim loses focus. Files outside vaults never autosave.<br>
-  Starting `nvim` with no files inside a vault opens the note edited last (moving or renaming a note counts).<br>
+  Starting `nvim` with no files inside a vault opens the note you had open last, or with no history in that vault, the one edited last.<br>
   In Markdown, text and commit messages, `Enter` continues lists, checkboxes and quotes like the app does (`Shift+Enter` breaks the line inside the item).
 - **Bible**: an Orthodox Bible in the vault, in five languages with one numbering, so a reference is the same verse in all of them.<br>
   References and verse links in notes, every translation on hover, a parallel translation split, cross-references. See [Bible](#bible).

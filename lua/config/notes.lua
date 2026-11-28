@@ -269,6 +269,18 @@ function M.new(todo)
   vim.api.nvim_win_set_cursor(0, { header + 1, 0 })
 end
 
+--- The note in `vault` opened last, from Neovim's file history (v:oldfiles), if it still exists
+function M.last_opened(vault)
+  local real = vim.uv.fs_realpath(vault) or vault
+  for _, file in ipairs(vim.v.oldfiles) do
+    local path = vim.fs.normalize(file)
+    if path:match '%.md$' and vim.uv.fs_stat(path) then
+      local root = M.root(path)
+      if root and (vim.uv.fs_realpath(root) or root) == real then return path end
+    end
+  end
+end
+
 --- The most recently edited note in `vault`, moves and renames included: they keep a file's
 --- mtime, so the ctime (bumped by writes and moves alike) is compared instead.
 --- Folders with a books.json (the Bible) are skipped, since regenerating it touches every book.
