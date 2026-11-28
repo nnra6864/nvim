@@ -8,9 +8,9 @@ local forgejo = {
 
 return {
   -- A collection of small plugins; only the modules configured here are enabled
-  -- Fork with tuios image support, until it's upstreamed
+  -- Fork: tuios image support, and Markdown indent scope that follows list items
   'nnra6864/snacks.nvim',
-  branch = 'tuios',
+  branch = 'main',
   priority = 1000,
   lazy = false,
   ---@type snacks.Config
@@ -69,8 +69,4 @@ return {
       url_patterns = { ['git%.nnstdios%.com'] = forgejo, ['codeberg%.org'] = forgejo },
     },
   },
-  config = function(_, opts)
-    require('snacks').setup(opts)
-    require('config.md_scope').setup()
-  end,
 }

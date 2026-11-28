@@ -215,7 +215,7 @@ Cross-references come from the Serbian and English editions, and optionally Open
 - [blink.cmp](https://github.com/saghen/blink.cmp), [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim): completion, snippets, emoji
 - [conform.nvim](https://github.com/stevearc/conform.nvim): formatting
 - [mini.nvim](https://github.com/nvim-mini/mini.nvim): statusline, icons, pairs, surround, text objects, align, move, highlights, git and diff signs
-- [snacks.nvim](https://github.com/folke/snacks.nvim): picker, notifications, indent guides, images, lazygit, zen, smooth scroll, toggles
+- [snacks.nvim](https://github.com/nnra6864/snacks.nvim) (fork of [folke/snacks.nvim](https://github.com/folke/snacks.nvim) with tuios image support and Markdown indent scope that follows list items): picker, notifications, indent guides, images, lazygit, zen, smooth scroll, toggles
 - [which-key.nvim](https://github.com/folke/which-key.nvim): keymap hints
 - [flash.nvim](https://github.com/folke/flash.nvim): jump motions
 - [guess-indent.nvim](https://github.com/NMAC427/guess-indent.nvim): indent detection
